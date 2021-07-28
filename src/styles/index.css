@@ -1,3 +1,45 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom styles*/
+@layer base {
+  body {
+    @apply bg-white;
+    @apply font-Mulish;
+    @apply text-typography-200;
+  }
+  /* p {
+        @apply font-pt-serif;
+        @apply leading-relaxed;
+        @apply text-gray-900;
+        @apply pb-2;
+    } */
+  h1 {
+    @apply font-Mulish;
+    @apply text-5xl;
+    @apply font-bold;
+    @apply text-primary-300;
+  }
+  h2 {
+    @apply font-Mulish;
+    @apply text-2xl;
+    @apply font-semibold;
+    @apply text-typography-200;
+  }
+  h3 {
+    @apply font-Mulish;
+    @apply text-2xl;
+    @apply font-bold;
+    @apply text-typography-300;
+  }
+  h4 {
+    @apply font-Mulish;
+    @apply text-base;
+    @apply text-typography-200;
+  }
+  p {
+    @apply text-typography-200;
+    @apply font-Mulish;
+  }
+}
