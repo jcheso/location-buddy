@@ -22,6 +22,8 @@ const Widget = () => {
   const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
   const libraries = ["places"];
 
+  const [addressFrom, setAddressFromState] = useState();
+
   const getDirections = (addressTo, addressFrom, travelMode) => {
     var directionsService = new google.maps.DirectionsService();
     var origin = new google.maps.LatLng(addressFrom.lat, addressFrom.lng);
@@ -41,11 +43,6 @@ const Widget = () => {
   const containerStyle = {
     width: "390px",
     height: "390px",
-  };
-
-  const center = {
-    lat: -33.8688,
-    lng: 151.2093,
   };
 
   const [tableData, setTableData] = React.useState([
@@ -107,7 +104,38 @@ const Widget = () => {
 
   const addAddressTo = (formData) => console.log(formData);
 
-  const setAddressFrom = (formData) => console.log(formData);
+  const getCoords = async (address) => {
+    const apiCall = fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${GOOGLE_API_KEY}`
+    );
+    const geoData = await (await apiCall).json();
+    const location = geoData.results[0].geometry.location;
+    console.log("1: ", location);
+    return location;
+  };
+
+  const [center, setCenter] = useState({
+    lat: -33.8688,
+    lng: 151.2093,
+  });
+
+  const setAddressFrom = async (formData) => {
+    // Update address from state
+    setAddressFromState(() => {
+      const newState = formData.addressFrom;
+      return newState;
+    });
+    // Get Coords of address and update Google map center property.
+    const addressFromCoords = await getCoords(addressFrom);
+    console.log("2: ", addressFromCoords);
+    setCenter((prevState) => ({
+      ...prevState,
+      lat: addressFromCoords.lat,
+      lng: addressFromCoords.lng,
+    }));
+    console.log("3: ", center);
+    return addressFromCoords;
+  };
 
   return (
     <LoadScript googleMapsApiKey={GOOGLE_API_KEY} libraries={libraries}>
@@ -144,15 +172,12 @@ const Widget = () => {
                   <input
                     type="text"
                     id="addressFrom"
+                    // defaultValue="42 Wallaby Way, Sydney NSW"
                     className="py-2 px-4 my-4 w-72 text-typography-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-300"
                     {...register("addressFrom", { required: true })}
                   />
                 </Autocomplete>
-                {/* <input
-                  className="py-2 px-4 my-4 w-72 text-typography-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-300 shadow-sm "
-                  defaultValue="42 Wallaby Way, Sydney NSW"
-                  {...register("addressFrom", { required: true })}
-                /> */}
+
                 <input
                   className="py-2 px-4 mx-6 my-4 bg-primary-300 text-white rounded-lg hover:bg-opacity-90 active:bg-opacity-100"
                   type="submit"
@@ -197,15 +222,12 @@ const Widget = () => {
                   <input
                     type="text"
                     id="addressTo"
+                    defaultValue="Taronga Zoo Sydney, Mosman NSW"
                     className="py-2 px-4 my-4 w-72 text-typography-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-300"
                     {...register("addressTo", { required: true })}
                   />
                 </Autocomplete>
-                {/* <input
-                  className="py-2 px-4 my-4 w-72 text-typography-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-300"
-                  defaultValue="Taronga Zoo Sydney, Mosman NSW"
-                  {...register("addressTo", { required: true })}
-                /> */}
+
                 <input
                   className="py-2 px-4 mx-6 my-4 bg-primary-300 text-white rounded-lg hover:bg-opacity-90 active:bg-opacity-100"
                   type="submit"
