@@ -1,25 +1,26 @@
 import React, { useMemo, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTable, useSortBy } from "react-table";
-import mapPlaceholder from "../assets/images/mapPlaceholder.png";
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import {
   TiArrowUnsorted,
   TiArrowSortedUp,
   TiArrowSortedDown,
   TiLocation,
 } from "react-icons/ti";
-import GoogleMapReact from "google-map-react";
-
-const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
-console.log(GOOGLE_API_KEY);
-
+import mapIcon from "../assets/images/baseline_home_black_36dp.png";
 const Widget = () => {
-  const defaultLocation = {
-    center: {
-      lat: -33.8688,
-      lng: 151.2093,
-    },
-    zoom: 11,
+  const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
+  const google = window.google;
+
+  const containerStyle = {
+    width: "390px",
+    height: "390px",
+  };
+
+  const center = {
+    lat: -33.8688,
+    lng: 151.2093,
   };
 
   const [data, setData] = React.useState(
@@ -43,23 +44,6 @@ const Widget = () => {
       []
     )
   );
-  const [skipPageReset, setSkipPageReset] = React.useState(false);
-
-  //  const updateMyData = (rowIndex, columnId, value) => {
-  //    // We also turn on the flag to not reset the page
-  //    setSkipPageReset(true);
-  //    setData((old) =>
-  //      old.map((row, index) => {
-  //        if (index === rowIndex) {
-  //          return {
-  //            ...old[rowIndex],
-  //            [columnId]: value,
-  //          };
-  //        }
-  //        return row;
-  //      })
-  //    );
-  //  };
 
   const columns = React.useMemo(
     () => [
@@ -99,10 +83,12 @@ const Widget = () => {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => console.log(data);
+  const onSubmit = (formData) => console.log(formData);
+
+  const getDirections = async (addressTo) => {};
 
   return (
-    <main className="rounded-xl bg-tertiary-100 border-2 border-typography-200 shadow-xl">
+    <main className="h-full w-auto rounded-xl bg-tertiary-100 border-2 border-typography-200 shadow-xl">
       {/* Heading Div */}
       <div className="my-6 mx-8 items-center">
         <h1>Location Buddy</h1>
@@ -141,26 +127,27 @@ const Widget = () => {
 
           {/* Map */}
           {/* <img className="my-4" src={mapPlaceholder} alt="mapPlaceholder" /> */}
-          <div className="w-96 h-96 my-4">
-            <GoogleMapReact
-              bootstrapURLKeys={{ key: GOOGLE_API_KEY }}
-              defaultCenter={defaultLocation.center}
-              defaultZoom={defaultLocation.zoom}
-            >
-              <TiLocation
-                className="h-12 w-12 text-primary-300"
-                lat={defaultLocation.center.lat}
-                lng={defaultLocation.center.lng}
-                text="My House"
-              />
-            </GoogleMapReact>
+          <div className="my-4">
+            <LoadScript googleMapsApiKey={GOOGLE_API_KEY}>
+              <GoogleMap
+                mapContainerStyle={containerStyle}
+                center={center}
+                zoom={12}
+              >
+                <Marker icon={mapIcon} position={center} />
+
+                {/* <TiLocation></TiLocation> */}
+                {/* Child components, such as markers, info windows, etc. */}
+                <></>
+              </GoogleMap>
+            </LoadScript>
           </div>
         </div>
 
         {/* Address To Div */}
         <div>
           {/* Address To Form */}
-          <form className="" onSubmit={handleSubmit(onSubmit)}>
+          <form className="" onSubmit={handleSubmit(getDirections)}>
             <h3>To</h3>
             <p className="font-light text-sm">
               Enter the locations you visit most
@@ -183,13 +170,11 @@ const Widget = () => {
               </span>
             )}
           </form>
+
           {/* Content Div */}
           <div className="">
             {/* Results Table */}
-            <table
-              className="table-auto rounded-lg bg-white my-4"
-              {...getTableProps()}
-            >
+            <table className="table-auto  bg-white my-4" {...getTableProps()}>
               <thead className="bg-secondary-100 rounded-lg">
                 {
                   // Loop over the header rows
@@ -201,7 +186,7 @@ const Widget = () => {
                         headerGroup.headers.map((column) => (
                           // Apply the header cell props
                           <th
-                            className="text-typography-300 font-semibold text-sm p-4 text-center"
+                            className="rounded-lg text-typography-300 font-semibold text-sm p-4 text-center"
                             {...column.getHeaderProps(
                               column.getSortByToggleProps()
                             )}
