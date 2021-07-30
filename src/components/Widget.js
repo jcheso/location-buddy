@@ -14,10 +14,16 @@ import {
   TiArrowSortedDown,
   TiDelete,
 } from "react-icons/ti";
-
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import homeIcon from "../assets/images/baseline_home_black_36dp.png";
 import locationIcon from "../assets/images/baseline_place_black_36dp.png";
 /*global google*/
+
+const schema = yup.object().shape({
+  addressFrom: yup.string().required(),
+  addressTo: yup.string().required(),
+});
 
 const Widget = () => {
   const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
@@ -45,7 +51,7 @@ const Widget = () => {
   });
 
   // Create state for tracking addressFrom
-  const [addressFrom, setAddressFromState] = useState();
+  const [addressFrom, setAddressFromState] = useState(false);
 
   //Create state to track results for table
   const [tableData, setTableData] = React.useState([]);
@@ -86,8 +92,12 @@ const Widget = () => {
   const {
     register,
     handleSubmit,
+    trigger,
+    getValues,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
 
   const delay = (time) =>
     new Promise((resolve) => {
@@ -104,16 +114,17 @@ const Widget = () => {
     return geoData.results[0].geometry.location;
   };
 
-  const setAddressFrom = async (formData) => {
+  const setAddressFrom = async (addressFrom) => {
+    console.log(addressFrom);
     // Remove data that is for different "From" address
     tableData.map((data) => {
       // Check if the data object addressFrom = new addressFrom
-      if (data.addressFrom !== formData.addressFrom) {
-        deleteAddressFromTable(formData.addressFrom);
+      if (data.addressFrom !== addressFrom) {
+        deleteAddressFromTable(addressFrom);
       }
     });
     // Get Coords of address and update Google map center property.
-    const coords = await getCoords(formData.addressFrom);
+    const coords = await getCoords(addressFrom);
     setCenter(coords);
     setBounds({
       east: coords.lng + radius,
@@ -122,7 +133,7 @@ const Widget = () => {
       west: coords.lng - radius,
     });
     //Set new addressFrom state
-    setAddressFromState(formData.addressFrom);
+    setAddressFromState(addressFrom);
   };
 
   const getDirections = async (addressFrom, addressTo, travelMode) => {
@@ -140,6 +151,7 @@ const Widget = () => {
   };
 
   const addAddressTo = async (formData) => {
+    console.log(formData);
     try {
       if (
         tableData.length < 6 &&
@@ -210,14 +222,15 @@ const Widget = () => {
         </div>
 
         {/* Form Div */}
-        <div className="mx-8 flex flex-col md:flex-row justify-center">
-          <div>
-            {/* Address From Section */}
-            <form
-              id="addressFrom"
-              className=""
-              onSubmit={handleSubmit(setAddressFrom)}
-            >
+        <form
+          id="addressFrom"
+          className=""
+          onSubmit={handleSubmit(addAddressTo)}
+        >
+          <div className="mx-8 flex flex-col md:flex-row justify-center">
+            <div>
+              {/* Address From Section */}
+
               <h3>From</h3>
               {errors.addressFrom ? (
                 <p className="text-red-500 text-sm font-light ">
@@ -239,42 +252,49 @@ const Widget = () => {
                   />
                 </Autocomplete>
 
-                <input
+                <button
                   className="py-2 px-4 mx-6 my-4 bg-primary-300 text-white rounded-lg hover:bg-opacity-90 active:bg-opacity-100"
-                  type="submit"
+                  type="button"
                   value="Select"
-                />
+                  onClick={async () => {
+                    await trigger("addressFrom").then((data) => {
+                      console.log(data);
+                      if (data) {
+                        const addressFrom = getValues("addressFrom");
+                        console.log(addressFrom);
+                        setAddressFrom(addressFrom);
+                      }
+                    });
+                  }}
+                >
+                  Select
+                </button>
               </div>
-            </form>
 
-            {/* Map */}
-            <div className="my-4">
-              <GoogleMap
-                mapContainerStyle={containerStyle}
-                center={center}
-                zoom={12}
-              >
-                {addressFrom && <Marker icon={homeIcon} position={center} />}
+              {/* Map */}
+              <div className="my-4">
+                <GoogleMap
+                  mapContainerStyle={containerStyle}
+                  center={center}
+                  zoom={12}
+                >
+                  {addressFrom && <Marker icon={homeIcon} position={center} />}
 
-                {tableData.map((data, index) => (
-                  <Marker
-                    key={index}
-                    icon={locationIcon}
-                    position={data.addressToCoords}
-                  ></Marker>
-                ))}
-              </GoogleMap>
+                  {tableData.map((data, index) => (
+                    <Marker
+                      key={index}
+                      icon={locationIcon}
+                      position={data.addressToCoords}
+                    ></Marker>
+                  ))}
+                </GoogleMap>
+              </div>
             </div>
-          </div>
 
-          {/* Address To Div */}
-          <div>
-            {/* Address To Form */}
-            <form
-              id="addressTo"
-              className=""
-              onSubmit={handleSubmit(addAddressTo)}
-            >
+            {/* Address To Div */}
+            <div>
+              {/* Address To Form */}
+
               <h3>To</h3>
               {errors.addressTo ? (
                 <p className="text-red-500 text-sm font-light ">
@@ -294,114 +314,116 @@ const Widget = () => {
                     placeholder="Taronga Zoo Sydney, Bradleys Head Road, Mosman NSW, Australia"
                     className="py-2 px-4 my-4 w-72 text-typography-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-300"
                     {...register("addressTo", {
-                      validate: (value) => {
-                        console.log(value);
-                        console.log(addressFrom);
-                        if (addressFrom && value) {
-                          return true;
-                        }
-                      },
+                      required: true,
                     })}
                   />
                 </Autocomplete>
 
-                <input
+                <button
                   className="py-2 px-4 mx-6 my-4 bg-primary-300 text-white rounded-lg hover:bg-opacity-90 active:bg-opacity-100"
                   type="submit"
                   value="Add"
-                />
+                >
+                  Add
+                </button>
               </div>
-            </form>
 
-            {/* Content Div */}
-            <div className="">
-              {/* Results Table */}
-              <table className="table-auto bg-white my-4" {...getTableProps()}>
-                <thead className="bg-secondary-100 rounded-lg">
-                  {
-                    // Loop over the header rows
-                    headerGroups.map((headerGroup) => (
-                      // Apply the header row props
-                      <tr {...headerGroup.getHeaderGroupProps()}>
-                        <td className="contents-center"></td>
-                        {
-                          // Loop over the headers in each row
-                          headerGroup.headers.map((column) => (
-                            // Apply the header cell props
-                            <th
-                              className="text-typography-300 font-semibold text-sm p-4 text-center"
-                              {...column.getHeaderProps(
-                                column.getSortByToggleProps()
-                              )}
-                            >
-                              <div className="flex flex-row items-center justify-end">
-                                {
-                                  // Render the header
-                                  column.render("Header")
-                                }
-                                <span className="pl-1">
-                                  {column.isSorted ? (
-                                    column.isSortedDesc ? (
-                                      <TiArrowSortedDown />
-                                    ) : (
-                                      <TiArrowSortedUp />
-                                    )
-                                  ) : (
-                                    <TiArrowUnsorted />
-                                  )}
-                                </span>
-                              </div>
-                            </th>
-                          ))
-                        }
-                      </tr>
-                    ))
-                  }
-                </thead>
-                {/* Apply the table body props */}
-                <tbody {...getTableBodyProps()}>
-                  {
-                    // Loop over the table rows
-                    rows.map((row) => {
-                      // Prepare the row for display
-                      prepareRow(row);
-                      return (
-                        // Apply the row props
-                        <tr
-                          className=" border-t border-tertiary-300 font-light text-sm  text-center "
-                          {...row.getRowProps()}
-                        >
-                          <td className="contents-center">
-                            <TiDelete
-                              onClick={() =>
-                                deleteAddressFromTable(row.values.addressTo)
-                              }
-                              className="h-8 w-8 m-2 hover:opacity-80 active:opacity-100"
-                            ></TiDelete>
-                          </td>
+              {/* Content Div */}
+              <div className="">
+                {/* Results Table */}
+                <table
+                  className="table-auto bg-white my-4"
+                  {...getTableProps()}
+                >
+                  <thead className="bg-secondary-100 rounded-lg">
+                    {
+                      // Loop over the header rows
+                      headerGroups.map((headerGroup) => (
+                        // Apply the header row props
+                        <tr {...headerGroup.getHeaderGroupProps()}>
+                          <td className="contents-center"></td>
                           {
-                            // Loop over the rows cells
-                            row.cells.map((cell, index) => {
-                              // Apply the cell props
-                              return (
-                                <td className=" p-4 " {...cell.getCellProps()}>
+                            // Loop over the headers in each row
+                            headerGroup.headers.map((column) => (
+                              // Apply the header cell props
+                              <th
+                                className="text-typography-300 font-semibold text-sm p-4 text-center"
+                                {...column.getHeaderProps(
+                                  column.getSortByToggleProps()
+                                )}
+                              >
+                                <div className="flex flex-row items-center justify-end">
                                   {
-                                    // Render the cell contents
-                                    cell.render("Cell")
+                                    // Render the header
+                                    column.render("Header")
                                   }
-                                </td>
-                              );
-                            })
+                                  <span className="pl-1">
+                                    {column.isSorted ? (
+                                      column.isSortedDesc ? (
+                                        <TiArrowSortedDown />
+                                      ) : (
+                                        <TiArrowSortedUp />
+                                      )
+                                    ) : (
+                                      <TiArrowUnsorted />
+                                    )}
+                                  </span>
+                                </div>
+                              </th>
+                            ))
                           }
                         </tr>
-                      );
-                    })
-                  }
-                </tbody>
-              </table>
+                      ))
+                    }
+                  </thead>
+                  {/* Apply the table body props */}
+                  <tbody {...getTableBodyProps()}>
+                    {
+                      // Loop over the table rows
+                      rows.map((row) => {
+                        // Prepare the row for display
+                        prepareRow(row);
+                        return (
+                          // Apply the row props
+                          <tr
+                            className=" border-t border-tertiary-300 font-light text-sm  text-center "
+                            {...row.getRowProps()}
+                          >
+                            <td className="contents-center">
+                              <TiDelete
+                                onClick={() =>
+                                  deleteAddressFromTable(row.values.addressTo)
+                                }
+                                className="h-8 w-8 m-2 hover:opacity-80 active:opacity-100"
+                              ></TiDelete>
+                            </td>
+                            {
+                              // Loop over the rows cells
+                              row.cells.map((cell, index) => {
+                                // Apply the cell props
+                                return (
+                                  <td
+                                    className=" p-4 "
+                                    {...cell.getCellProps()}
+                                  >
+                                    {
+                                      // Render the cell contents
+                                      cell.render("Cell")
+                                    }
+                                  </td>
+                                );
+                              })
+                            }
+                          </tr>
+                        );
+                      })
+                    }
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
-        </div>
+        </form>
       </main>
     </LoadScript>
   );
