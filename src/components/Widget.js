@@ -41,7 +41,7 @@ const Widget = () => {
   });
 
   // Set search radius for autocomplete
-  const radius = 0.01;
+  const radius = 0.001;
 
   // Set the bounds for autocomplete based on center of map and search radius
   const [bounds, setBounds] = useState({
@@ -228,11 +228,11 @@ const Widget = () => {
               <h3>From</h3>
               {errors.addressFrom ? (
                 <p className="text-red-500 text-sm font-light ">
-                  Enter the address you're interested in first
+                  Select the address you're interested in first
                 </p>
               ) : (
                 <p className="font-light text-sm">
-                  Enter the address you're interested in
+                  Select the address you're interested in
                 </p>
               )}
               <div className="flex flex-row items-center">
