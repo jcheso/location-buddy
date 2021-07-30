@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTable, useSortBy } from "react-table";
 import {
@@ -117,7 +117,7 @@ const Widget = () => {
 
   const setAddressFrom = async (addressFrom) => {
     // Remove data that is for different "From" address
-    tableData.map((data) => {
+    tableData.forEach((data) => {
       // Check if the data object addressFrom = new addressFrom
       if (data.addressFrom !== addressFrom) {
         deleteAddressFromTable(addressFrom);
