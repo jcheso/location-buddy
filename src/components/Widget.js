@@ -20,50 +20,25 @@ import mapIcon from "../assets/images/baseline_home_black_36dp.png";
 
 const Widget = () => {
   const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
-  const libraries = ["places"];
-
-  const [addressFrom, setAddressFromState] = useState();
-
-  const getDirections = (addressTo, addressFrom, travelMode) => {
-    var directionsService = new google.maps.DirectionsService();
-    var origin = new google.maps.LatLng(addressFrom.lat, addressFrom.lng);
-    var destination = new google.maps.LatLng(addressTo.lat, addressTo.lng);
-    var request = {
-      origin: "Chicago, IL",
-      destination: "Los Angeles, CA",
-      travelMode: "DRIVING",
-    };
-    directionsService.route(request, function (response, status) {
-      if (status === "OK") {
-        console.log(response);
-      }
-    });
-  };
-
   const containerStyle = {
     width: "390px",
     height: "390px",
   };
+  const libraries = ["places"];
 
-  const [tableData, setTableData] = React.useState([
-    {
-      addressTo: "Taronga Zoo Sydney, Mosman NSW",
-      walkTime: 40,
-      cycleTime: 23,
-      driveTime: 10,
-      pubTransTime: 51,
-    },
-    {
-      addressTo: "University of Sydney, Camperdown NSW",
-      walkTime: 30,
-      cycleTime: 15,
-      driveTime: 8,
-      pubTransTime: 21,
-    },
-  ]);
+  // Set default center
+  const [center, setCenter] = useState({
+    lat: -33.8512893,
+    lng: 151.2191385,
+  });
+  // Create state for tracking addressFrom
+  const [addressFrom, setAddressFromState] = useState(
+    "Kirribilli House, Kirribilli Avenue, Kirribilli NSW, Australia"
+  );
+  //Create state to track results for table
+  const [tableData, setTableData] = React.useState([]);
 
-  const data = React.useMemo(() => tableData, []);
-
+  // Declare and Memoize columns for React table
   const columns = React.useMemo(
     () => [
       {
@@ -72,25 +47,26 @@ const Widget = () => {
       },
       {
         Header: "Walk",
-        accessor: "walkTime",
+        accessor: "WALKING",
       },
       {
         Header: "Cycle",
-        accessor: "cycleTime",
+        accessor: "BICYCLING",
       },
       {
         Header: "Drive",
-        accessor: "driveTime",
+        accessor: "DRIVING",
       },
       {
         Header: "Public Transport",
-        accessor: "pubTransTime",
+        accessor: "TRANSIT",
       },
     ],
     []
   );
 
-  const tableInstance = useTable({ columns, data: data }, useSortBy);
+  // Create table with useSortBy function
+  const tableInstance = useTable({ columns, data: tableData }, useSortBy);
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
     tableInstance;
@@ -102,39 +78,70 @@ const Widget = () => {
     formState: { errors },
   } = useForm();
 
-  const addAddressTo = (formData) => console.log(formData);
-
-  const getCoords = async (address) => {
-    const apiCall = fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${GOOGLE_API_KEY}`
+  const getCoords = async (addressFrom) => {
+    const geoObj = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${addressFrom}&key=${GOOGLE_API_KEY}`
     );
-    const geoData = await (await apiCall).json();
-    const location = geoData.results[0].geometry.location;
-    console.log("1: ", location);
-    return location;
+    const geoData = await geoObj.json();
+    return geoData.results[0].geometry.location;
   };
-
-  const [center, setCenter] = useState({
-    lat: -33.8688,
-    lng: 151.2093,
-  });
 
   const setAddressFrom = async (formData) => {
     // Update address from state
-    setAddressFromState(() => {
-      const newState = formData.addressFrom;
-      return newState;
-    });
+    setAddressFromState(formData.addressFrom);
     // Get Coords of address and update Google map center property.
-    const addressFromCoords = await getCoords(addressFrom);
-    console.log("2: ", addressFromCoords);
-    setCenter((prevState) => ({
-      ...prevState,
-      lat: addressFromCoords.lat,
-      lng: addressFromCoords.lng,
-    }));
-    console.log("3: ", center);
-    return addressFromCoords;
+    const coords = await getCoords(formData.addressFrom);
+    setCenter(coords);
+  };
+
+  const getDirections = async (addressFrom, addressTo, travelMode) => {
+    const directionsService = new google.maps.DirectionsService();
+    // var origin = new google.maps.LatLng(addressFrom.lat, addressFrom.lng);
+    // var destination = new google.maps.LatLng(addressTo.lat, addressTo.lng);
+    const request = {
+      origin: addressFrom,
+      destination: addressTo,
+      travelMode: travelMode,
+    };
+    const directionsData = await directionsService.route(request);
+    await delay(300);
+
+    return directionsData;
+  };
+  const delay = (time) =>
+    new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, time);
+    });
+  const addAddressTo = async (formData) => {
+    const travelModes = ["WALKING", "BICYCLING", "DRIVING", "TRANSIT"];
+    const directionsData = [];
+
+    for (let index = 0; index < travelModes.length; index++) {
+      try {
+        const directions = await getDirections(
+          formData.addressTo,
+          formData.addressFrom,
+          travelModes[index]
+        );
+        directionsData.push(directions);
+      } catch (error) {
+        alert("There is no route between these locations");
+        break;
+      }
+    }
+
+    let newTableObj = {
+      addressFrom: formData.addressFrom,
+      addressTo: formData.addressTo,
+      WALKING: directionsData[0].routes[0].legs[0].duration.text,
+      BICYCLING: directionsData[1].routes[0].legs[0].duration.text,
+      DRIVING: directionsData[2].routes[0].legs[0].duration.text,
+      TRANSIT: directionsData[3].routes[0].legs[0].duration.text,
+    };
+    // const newTableData = React.useMemo(() => [tableData, newTableObj], []);
+    setTableData((oldTableData) => [...oldTableData, newTableObj]);
   };
 
   return (
@@ -160,11 +167,11 @@ const Widget = () => {
               <h3>From</h3>
               {errors.addressFrom ? (
                 <p className="text-red-500 text-sm font-light ">
-                  Enter an address to check the travel times
+                  Enter the address you're interested in first
                 </p>
               ) : (
                 <p className="font-light text-sm">
-                  Enter an address to check the travel times
+                  Enter the address you're interested in
                 </p>
               )}
               <div className="flex flex-row items-center">
@@ -172,7 +179,7 @@ const Widget = () => {
                   <input
                     type="text"
                     id="addressFrom"
-                    // defaultValue="42 Wallaby Way, Sydney NSW"
+                    defaultValue="Kirribilli House, Kirribilli Avenue, Kirribilli NSW, Australia"
                     className="py-2 px-4 my-4 w-72 text-typography-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-300"
                     {...register("addressFrom", { required: true })}
                   />
@@ -209,11 +216,11 @@ const Widget = () => {
               <h3>To</h3>
               {errors.addressTo ? (
                 <p className="text-red-500 text-sm font-light ">
-                  Enter the locations you visit most
+                  Add a location you visit often first
                 </p>
               ) : (
                 <p className="font-light text-sm">
-                  Enter the locations you visit most
+                  Add a location you visit often
                 </p>
               )}
 
@@ -222,7 +229,8 @@ const Widget = () => {
                   <input
                     type="text"
                     id="addressTo"
-                    defaultValue="Taronga Zoo Sydney, Mosman NSW"
+                    bounds={center}
+                    defaultValue="Taronga Zoo Sydney, Bradleys Head Road, Mosman NSW, Australia"
                     className="py-2 px-4 my-4 w-72 text-typography-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-300"
                     {...register("addressTo", { required: true })}
                   />
@@ -302,8 +310,7 @@ const Widget = () => {
                                   {
                                     // Render the cell contents
                                     cell.render("Cell")
-                                  }{" "}
-                                  {index > 0 && <>Minutes</>}
+                                  }
                                 </td>
                               );
                             })
