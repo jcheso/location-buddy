@@ -4,7 +4,7 @@ import Widget from "../components/Widget";
 
 function App() {
   return (
-    <main className="flex justify-center items-center align-middle pt-8">
+    <main className="flex h-screen w-screen justify-center align-middle content-center">
       <Widget></Widget>
     </main>
   );

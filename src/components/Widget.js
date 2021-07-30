@@ -12,10 +12,11 @@ import {
   TiArrowUnsorted,
   TiArrowSortedUp,
   TiArrowSortedDown,
+  TiDelete,
 } from "react-icons/ti";
 
-import mapIcon from "../assets/images/baseline_home_black_36dp.png";
-
+import homeIcon from "../assets/images/baseline_home_black_36dp.png";
+import locationIcon from "../assets/images/baseline_place_black_36dp.png";
 /*global google*/
 
 const Widget = () => {
@@ -31,10 +32,21 @@ const Widget = () => {
     lat: -33.8512893,
     lng: 151.2191385,
   });
+
+  // Set search radius for autocomplete
+  const radius = 0.25;
+
+  // Set the bounds for autocomplete based on center of map and search radius
+  const [bounds, setBounds] = useState({
+    east: center.lng + radius,
+    north: center.lat + radius,
+    south: center.lat - radius,
+    west: center.lng - radius,
+  });
+
   // Create state for tracking addressFrom
-  const [addressFrom, setAddressFromState] = useState(
-    "Kirribilli House, Kirribilli Avenue, Kirribilli NSW, Australia"
-  );
+  const [addressFrom, setAddressFromState] = useState();
+
   //Create state to track results for table
   const [tableData, setTableData] = React.useState([]);
 
@@ -74,9 +86,15 @@ const Widget = () => {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm();
+
+  const delay = (time) =>
+    new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, time);
+    });
 
   const getCoords = async (addressFrom) => {
     const geoObj = await fetch(
@@ -87,11 +105,24 @@ const Widget = () => {
   };
 
   const setAddressFrom = async (formData) => {
-    // Update address from state
-    setAddressFromState(formData.addressFrom);
+    // Remove data that is for different "From" address
+    tableData.map((data) => {
+      // Check if the data object addressFrom = new addressFrom
+      if (data.addressFrom !== formData.addressFrom) {
+        deleteAddressFromTable(formData.addressFrom);
+      }
+    });
     // Get Coords of address and update Google map center property.
     const coords = await getCoords(formData.addressFrom);
     setCenter(coords);
+    setBounds({
+      east: coords.lng + radius,
+      north: coords.lat + radius,
+      south: coords.lat - radius,
+      west: coords.lng - radius,
+    });
+    //Set new addressFrom state
+    setAddressFromState(formData.addressFrom);
   };
 
   const getDirections = async (addressFrom, addressTo, travelMode) => {
@@ -105,48 +136,71 @@ const Widget = () => {
     };
     const directionsData = await directionsService.route(request);
     await delay(300);
-
     return directionsData;
   };
-  const delay = (time) =>
-    new Promise((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, time);
-    });
+
   const addAddressTo = async (formData) => {
-    const travelModes = ["WALKING", "BICYCLING", "DRIVING", "TRANSIT"];
-    const directionsData = [];
-
-    for (let index = 0; index < travelModes.length; index++) {
-      try {
-        const directions = await getDirections(
-          formData.addressTo,
-          formData.addressFrom,
-          travelModes[index]
-        );
-        directionsData.push(directions);
-      } catch (error) {
-        alert("There is no route between these locations");
-        break;
+    try {
+      if (
+        tableData.length < 6 &&
+        getIndexOfAddress(formData.addressTo) === -1
+      ) {
+        const travelModes = ["WALKING", "BICYCLING", "DRIVING", "TRANSIT"];
+        const directionsData = [];
+        for (let index = 0; index < travelModes.length; index++) {
+          try {
+            const directions = await getDirections(
+              formData.addressTo,
+              formData.addressFrom,
+              travelModes[index]
+            );
+            directionsData.push(directions);
+          } catch (error) {
+            alert("There is no route between these locations");
+            break;
+          }
+        }
+        let newTableObj = {
+          addressFrom: formData.addressFrom,
+          addressTo: formData.addressTo,
+          addressToCoords: await getCoords(formData.addressTo),
+          WALKING: directionsData[0].routes[0].legs[0].duration.text,
+          BICYCLING: directionsData[1].routes[0].legs[0].duration.text,
+          DRIVING: directionsData[2].routes[0].legs[0].duration.text,
+          TRANSIT: directionsData[3].routes[0].legs[0].duration.text,
+        };
+        setTableData((oldTableData) => [...oldTableData, newTableObj]);
+      } else if (tableData.length >= 6) {
+        alert("You can only compare six locations at a time");
+      } else if (getIndexOfAddress(formData.addressTo) !== -1) {
+        alert("You've already added this location!");
       }
+    } catch (error) {
+      console.log(error);
+      alert("An unexpected error occurred, try again.");
     }
+  };
 
-    let newTableObj = {
-      addressFrom: formData.addressFrom,
-      addressTo: formData.addressTo,
-      WALKING: directionsData[0].routes[0].legs[0].duration.text,
-      BICYCLING: directionsData[1].routes[0].legs[0].duration.text,
-      DRIVING: directionsData[2].routes[0].legs[0].duration.text,
-      TRANSIT: directionsData[3].routes[0].legs[0].duration.text,
-    };
-    // const newTableData = React.useMemo(() => [tableData, newTableObj], []);
-    setTableData((oldTableData) => [...oldTableData, newTableObj]);
+  const getIndexOfAddress = (address) => {
+    const index = tableData.findIndex(
+      (element) => element.addressTo === address
+    );
+    return index;
+  };
+
+  const deleteAddressFromTable = (address) => {
+    const index = getIndexOfAddress(address);
+    setTableData((oldTableData) => {
+      let newTableData = [...oldTableData];
+      newTableData.splice(index, 1);
+      return newTableData;
+    });
+    console.log(tableData);
   };
 
   return (
     <LoadScript googleMapsApiKey={GOOGLE_API_KEY} libraries={libraries}>
-      <main className="h-full w-auto rounded-xl bg-tertiary-100 border-2 border-typography-200 shadow-xl">
+      <main className="max-w-7xl rounded-xl bg-tertiary-100 border-2 border-typography-200 shadow-xl">
         {/* Heading Div */}
         <div className="my-6 mx-8 items-center">
           <h1>Location Buddy</h1>
@@ -175,11 +229,11 @@ const Widget = () => {
                 </p>
               )}
               <div className="flex flex-row items-center">
-                <Autocomplete>
+                <Autocomplete bounds={bounds}>
                   <input
                     type="text"
                     id="addressFrom"
-                    defaultValue="Kirribilli House, Kirribilli Avenue, Kirribilli NSW, Australia"
+                    placeholder="Kirribilli House, Kirribilli Avenue, Kirribilli NSW, Australia"
                     className="py-2 px-4 my-4 w-72 text-typography-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-300"
                     {...register("addressFrom", { required: true })}
                   />
@@ -200,7 +254,15 @@ const Widget = () => {
                 center={center}
                 zoom={12}
               >
-                <Marker icon={mapIcon} position={center} />
+                {addressFrom && <Marker icon={homeIcon} position={center} />}
+
+                {tableData.map((data, index) => (
+                  <Marker
+                    key={index}
+                    icon={locationIcon}
+                    position={data.addressToCoords}
+                  ></Marker>
+                ))}
               </GoogleMap>
             </div>
           </div>
@@ -225,14 +287,21 @@ const Widget = () => {
               )}
 
               <div className="flex flex-row items-center">
-                <Autocomplete>
+                <Autocomplete bounds={bounds}>
                   <input
                     type="text"
                     id="addressTo"
-                    bounds={center}
-                    defaultValue="Taronga Zoo Sydney, Bradleys Head Road, Mosman NSW, Australia"
+                    placeholder="Taronga Zoo Sydney, Bradleys Head Road, Mosman NSW, Australia"
                     className="py-2 px-4 my-4 w-72 text-typography-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-300"
-                    {...register("addressTo", { required: true })}
+                    {...register("addressTo", {
+                      validate: (value) => {
+                        console.log(value);
+                        console.log(addressFrom);
+                        if (addressFrom && value) {
+                          return true;
+                        }
+                      },
+                    })}
                   />
                 </Autocomplete>
 
@@ -254,6 +323,7 @@ const Widget = () => {
                     headerGroups.map((headerGroup) => (
                       // Apply the header row props
                       <tr {...headerGroup.getHeaderGroupProps()}>
+                        <td className="contents-center"></td>
                         {
                           // Loop over the headers in each row
                           headerGroup.headers.map((column) => (
@@ -298,9 +368,17 @@ const Widget = () => {
                       return (
                         // Apply the row props
                         <tr
-                          className="hover:bg-tertiary-200 border-t border-tertiary-300 font-light text-sm  text-center "
+                          className=" border-t border-tertiary-300 font-light text-sm  text-center "
                           {...row.getRowProps()}
                         >
+                          <td className="contents-center">
+                            <TiDelete
+                              onClick={() =>
+                                deleteAddressFromTable(row.values.addressTo)
+                              }
+                              className="h-8 w-8 m-2 hover:opacity-80 active:opacity-100"
+                            ></TiDelete>
+                          </td>
                           {
                             // Loop over the rows cells
                             row.cells.map((cell, index) => {
