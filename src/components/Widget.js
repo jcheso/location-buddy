@@ -6,6 +6,7 @@ import {
   LoadScript,
   Marker,
   Autocomplete,
+  DirectionsRenderer,
 } from "@react-google-maps/api";
 
 import {
@@ -40,7 +41,7 @@ const Widget = () => {
   });
 
   // Set search radius for autocomplete
-  const radius = 0.25;
+  const radius = 0.01;
 
   // Set the bounds for autocomplete based on center of map and search radius
   const [bounds, setBounds] = useState({
@@ -115,7 +116,6 @@ const Widget = () => {
   };
 
   const setAddressFrom = async (addressFrom) => {
-    console.log(addressFrom);
     // Remove data that is for different "From" address
     tableData.map((data) => {
       // Check if the data object addressFrom = new addressFrom
@@ -151,7 +151,6 @@ const Widget = () => {
   };
 
   const addAddressTo = async (formData) => {
-    console.log(formData);
     try {
       if (
         tableData.length < 6 &&
@@ -176,6 +175,7 @@ const Widget = () => {
           addressFrom: formData.addressFrom,
           addressTo: formData.addressTo,
           addressToCoords: await getCoords(formData.addressTo),
+          drivingDirections: directionsData[2],
           WALKING: directionsData[0].routes[0].legs[0].duration.text,
           BICYCLING: directionsData[1].routes[0].legs[0].duration.text,
           DRIVING: directionsData[2].routes[0].legs[0].duration.text,
@@ -188,7 +188,6 @@ const Widget = () => {
         alert("You've already added this location!");
       }
     } catch (error) {
-      console.log(error);
       alert("An unexpected error occurred, try again.");
     }
   };
@@ -207,12 +206,11 @@ const Widget = () => {
       newTableData.splice(index, 1);
       return newTableData;
     });
-    console.log(tableData);
   };
 
   return (
     <LoadScript googleMapsApiKey={GOOGLE_API_KEY} libraries={libraries}>
-      <main className="max-w-7xl rounded-xl bg-tertiary-100 border-2 border-typography-200 shadow-xl">
+      <main className="w-2/3 rounded-xl bg-tertiary-100 border-2 border-typography-200 shadow-xl">
         {/* Heading Div */}
         <div className="my-6 mx-8 items-center">
           <h1>Location Buddy</h1>
@@ -222,13 +220,9 @@ const Widget = () => {
         </div>
 
         {/* Form Div */}
-        <form
-          id="addressFrom"
-          className=""
-          onSubmit={handleSubmit(addAddressTo)}
-        >
-          <div className="mx-8 flex flex-col md:flex-row justify-center">
-            <div>
+        <form onSubmit={handleSubmit(addAddressTo)}>
+          <div className="mx-8 grid grid-cols-3 justify-between">
+            <div className="col-span-1">
               {/* Address From Section */}
 
               <h3>From</h3>
@@ -258,10 +252,8 @@ const Widget = () => {
                   value="Select"
                   onClick={async () => {
                     await trigger("addressFrom").then((data) => {
-                      console.log(data);
                       if (data) {
                         const addressFrom = getValues("addressFrom");
-                        console.log(addressFrom);
                         setAddressFrom(addressFrom);
                       }
                     });
@@ -277,22 +269,32 @@ const Widget = () => {
                   mapContainerStyle={containerStyle}
                   center={center}
                   zoom={12}
+                  options={{ style: {} }}
                 >
                   {addressFrom && <Marker icon={homeIcon} position={center} />}
 
                   {tableData.map((data, index) => (
-                    <Marker
-                      key={index}
-                      icon={locationIcon}
-                      position={data.addressToCoords}
-                    ></Marker>
+                    <>
+                      <DirectionsRenderer
+                        directions={data.drivingDirections}
+                        options={{ markerOptions: { visible: false } }}
+                      />
+                      <Marker
+                        key={index}
+                        icon={{
+                          url: locationIcon,
+                          scaledSize: new window.google.maps.Size(35, 35),
+                        }}
+                        position={data.addressToCoords}
+                      />
+                    </>
                   ))}
                 </GoogleMap>
               </div>
             </div>
 
             {/* Address To Div */}
-            <div>
+            <div className="col-span-2">
               {/* Address To Form */}
 
               <h3>To</h3>
@@ -329,10 +331,10 @@ const Widget = () => {
               </div>
 
               {/* Content Div */}
-              <div className="">
+              <div className="w-full">
                 {/* Results Table */}
                 <table
-                  className="table-auto bg-white my-4"
+                  className="table-auto w-full bg-white my-4"
                   {...getTableProps()}
                 >
                   <thead className="bg-secondary-100 rounded-lg">
