@@ -210,7 +210,7 @@ const Widget = () => {
 
   return (
     <LoadScript googleMapsApiKey={GOOGLE_API_KEY} libraries={libraries}>
-      <main className="w-2/3 rounded-xl bg-tertiary-100 border-2 border-typography-200 shadow-xl">
+      <main className="w-auto rounded-xl bg-tertiary-100 border-2 border-typography-200 shadow-xl">
         {/* Heading Div */}
         <div className="my-6 mx-8 items-center">
           <h1>Location Buddy</h1>
