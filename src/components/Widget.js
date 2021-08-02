@@ -17,6 +17,8 @@ import {
 } from "react-icons/ti";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { usePromiseTracker } from "react-promise-tracker";
+import { trackPromise } from "react-promise-tracker";
 import homeIcon from "../assets/images/baseline_home_black_36dp.png";
 import locationIcon from "../assets/images/baseline_place_black_36dp.png";
 /*global google*/
@@ -27,7 +29,10 @@ const schema = yup.object().shape({
 });
 
 const Widget = () => {
+  const { promiseInProgress } = usePromiseTracker();
   const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
+  const GEOCODING_API_KEY = process.env.REACT_APP_GEOCODING_API_KEY;
+
   const containerStyle = {
     width: "390px",
     height: "390px",
@@ -109,7 +114,7 @@ const Widget = () => {
 
   const getCoords = async (addressFrom) => {
     const geoObj = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=${addressFrom}&key=${GOOGLE_API_KEY}`
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${addressFrom}&key=${GEOCODING_API_KEY}`
     );
     const geoData = await geoObj.json();
     return geoData.results[0].geometry.location;
@@ -380,6 +385,10 @@ const Widget = () => {
                   </thead>
                   {/* Apply the table body props */}
                   <tbody {...getTableBodyProps()}>
+                    {promiseInProgress && (
+                      <h1>Hey some async call in progress ! </h1>
+                    )}
+                    );
                     {
                       // Loop over the table rows
                       rows.map((row) => {
