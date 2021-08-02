@@ -30,23 +30,29 @@ const schema = yup.object().shape({
 const Widget = () => {
   const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
   const GEOCODING_API_KEY = process.env.REACT_APP_GEOCODING_API_KEY;
-
   const containerStyle = {
     width: "405px",
     height: "405px",
   };
-
+  // Register React Hook Form
+  const {
+    register,
+    handleSubmit,
+    trigger,
+    getValues,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
+  // Set library for Autocomplete
   const [libraries] = useState(["places"]);
-
   // Set default center
   const [center, setCenter] = useState({
     lat: -33.8512893,
     lng: 151.2191385,
   });
-
   // Set search radius for autocomplete
   const radius = 0.001;
-
   // Set the bounds for autocomplete based on center of map and search radius
   const [bounds, setBounds] = useState({
     east: center.lng + radius,
@@ -54,19 +60,19 @@ const Widget = () => {
     south: center.lat - radius,
     west: center.lng - radius,
   });
-
   // Create state for tracking addressFrom
   const [addressFrom, setAddressFromState] = useState(false);
-
-  //Create state to track results for table
+  // Create state to track results for table
   const [tableData, setTableData] = React.useState([]);
-
-  //Create state to track loading of results
+  // Create state to track loading of results
   const [loading, setLoading] = React.useState(false);
-
   // Declare and Memoize columns for React table
   const columns = React.useMemo(
     () => [
+      {
+        Header: "Direction",
+        accessor: "travelDirection", // accessor is the "key" in the data
+      },
       {
         Header: "Location",
         accessor: "addressTo", // accessor is the "key" in the data
@@ -90,23 +96,13 @@ const Widget = () => {
     ],
     []
   );
-
   // Create table with useSortBy function
   const tableInstance = useTable({ columns, data: tableData }, useSortBy);
-
+  // Create React Table instance
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
     tableInstance;
 
-  const {
-    register,
-    handleSubmit,
-    trigger,
-    getValues,
-    formState: { errors },
-  } = useForm({
-    resolver: yupResolver(schema),
-  });
-
+  // Function to delay API calls to avoid query limit
   const delay = (time) =>
     new Promise((resolve) => {
       setTimeout(() => {
@@ -114,15 +110,16 @@ const Widget = () => {
       }, time);
     });
 
+  // Get the coordinates of a given address
   const getCoords = async (addressFrom) => {
     const geoObj = await fetch(
       `https://maps.googleapis.com/maps/api/geocode/json?address=${addressFrom}&key=${GEOCODING_API_KEY}`
     );
-
     const geoData = await geoObj.json();
     return geoData.results[0].geometry.location;
   };
 
+  // Set the address you are interested in
   const setAddressFrom = async (newAddressFrom) => {
     if (addressFrom !== newAddressFrom) {
       // Remove data that is for different "From" address
@@ -148,10 +145,52 @@ const Widget = () => {
     }
   };
 
-  const getDirections = async (addressFrom, addressTo, travelMode) => {
+  // Get directions for a given location
+  const getDirections = async (
+    addressFrom,
+    addressTo,
+    travelMode
+    // travelTime,
+    // travelTimeRule
+  ) => {
+    // let drivingOptions = {};
+    // let transitOptions = {};
+    // let request = {};
+    // if (travelMode === "DRIVING" && travelTimeRule === "Depart At") {
+    //   drivingOptions = { departureTime: travelTime };
+    //   request = {
+    //     origin: addressFrom,
+    //     destination: addressTo,
+    //     travelMode: travelMode,
+    //     drivingOptions: drivingOptions,
+    //     // transitOptions: transitOptions,
+    //   };
+    // } else if (travelMode === "TRANSIT" && travelTimeRule === "Depart At") {
+    //   transitOptions = { departureTime: travelTime };
+    //   request = {
+    //     origin: addressFrom,
+    //     destination: addressTo,
+    //     travelMode: travelMode,
+    //     // drivingOptions: drivingOptions,
+    //     transitOptions: transitOptions,
+    //   };
+    // } else if (travelMode === "TRANSIT" && travelTimeRule === "Arrive By") {
+    //   transitOptions = { arrivalBy: travelTime };
+    //   request = {
+    //     origin: addressFrom,
+    //     destination: addressTo,
+    //     travelMode: travelMode,
+    //     // drivingOptions: drivingOptions,
+    //     transitOptions: transitOptions,
+    //   };
+    // } else {
+    //   request = {
+    //     origin: addressFrom,
+    //     destination: addressTo,
+    //     travelMode: travelMode,
+    //   };
+    // }
     const directionsService = new google.maps.DirectionsService();
-    // var origin = new google.maps.LatLng(addressFrom.lat, addressFrom.lng);
-    // var destination = new google.maps.LatLng(addressTo.lat, addressTo.lng);
     const request = {
       origin: addressFrom,
       destination: addressTo,
@@ -166,19 +205,39 @@ const Widget = () => {
     try {
       if (
         tableData.length < 6 &&
-        getIndexOfAddress(formData.addressTo) === -1
+        getIndexOfAddress(formData.addressTo, formData.travelDirection) === -1
       ) {
         const travelModes = ["WALKING", "BICYCLING", "DRIVING", "TRANSIT"];
+        // let travelTime = new Date(Date.now());
+        // let travelTimeRule = formData.travelTimeRule;
+        // if (formData.travelTime !== "") {
+        //   travelTime = new Date(formData.travelTime);
+        //   travelTimeRule = formData.travelTimeRule;
+        // }
+        const preferredTravelModeIndex = travelModes.indexOf(
+          formData.preferredTravelMode
+        );
         const directionsData = [];
         setLoading(true);
         for (let index = 0; index < travelModes.length; index++) {
           try {
-            const directions = await getDirections(
-              formData.addressTo,
-              formData.addressFrom,
-              travelModes[index]
-            );
-            directionsData.push(directions);
+            if (formData.travelDirection === "From Home") {
+              const directions = await getDirections(
+                formData.addressTo,
+                formData.addressFrom,
+                travelModes[index]
+                // travelTime,
+                // travelTimeRule
+              );
+              directionsData.push(directions);
+            } else if (formData.travelDirection === "To Home") {
+              const directions = await getDirections(
+                formData.addressFrom,
+                formData.addressTo,
+                travelModes[index]
+              );
+              directionsData.push(directions);
+            }
           } catch (error) {
             setLoading(false);
             alert("There is no route between these locations");
@@ -189,7 +248,8 @@ const Widget = () => {
           addressFrom: formData.addressFrom,
           addressTo: formData.addressTo,
           addressToCoords: await getCoords(formData.addressTo),
-          drivingDirections: directionsData[2],
+          travelDirection: formData.travelDirection,
+          mapDirections: directionsData[preferredTravelModeIndex],
           WALKING: directionsData[0].routes[0].legs[0].duration.text,
           BICYCLING: directionsData[1].routes[0].legs[0].duration.text,
           DRIVING: directionsData[2].routes[0].legs[0].duration.text,
@@ -199,7 +259,9 @@ const Widget = () => {
         setLoading(false);
       } else if (tableData.length >= 6) {
         alert("You can only compare six locations at a time");
-      } else if (getIndexOfAddress(formData.addressTo) !== -1) {
+      } else if (
+        getIndexOfAddress(formData.addressTo, formData.travelDirection) !== -1
+      ) {
         alert("You've already added this location!");
       }
     } catch (error) {
@@ -207,15 +269,17 @@ const Widget = () => {
     }
   };
 
-  const getIndexOfAddress = (address) => {
+  const getIndexOfAddress = (address, travelDirection) => {
     const index = tableData.findIndex(
-      (element) => element.addressTo === address
+      (element) =>
+        element.addressTo === address &&
+        element.travelDirection === travelDirection
     );
     return index;
   };
 
-  const deleteAddressFromTable = (address) => {
-    const index = getIndexOfAddress(address);
+  const deleteAddressFromTable = (address, travelDirection) => {
+    const index = getIndexOfAddress(address, travelDirection);
     setTableData((oldTableData) => {
       let newTableData = [...oldTableData];
       newTableData.splice(index, 1);
@@ -226,18 +290,17 @@ const Widget = () => {
   return (
     <LoadScript googleMapsApiKey={GOOGLE_API_KEY} libraries={libraries}>
       <main className="w-auto rounded-xl bg-tertiary-100 border-2 border-typography-200 shadow-xl">
-        {/* Heading Div */}
-        <div className="my-6 mx-8 items-center">
-          <h1>Location Buddy</h1>
-          <h2 className="my-2 font-extralight">
-            We help you find the perfectly located home
-          </h2>
-        </div>
-
         {/* Form Div */}
         <form onSubmit={handleSubmit(addAddressTo)}>
           <div className="mx-8 grid grid-cols-3 justify-between">
             <div className="col-span-1">
+              {/* Heading Div */}
+              <div className="my-6 items-center">
+                <h1>Location Buddy</h1>
+                <h2 className="my-2 font-extralight">
+                  We help you find the perfectly located home
+                </h2>
+              </div>
               {/* Address From Section */}
 
               <h3>From</h3>
@@ -290,7 +353,7 @@ const Widget = () => {
                   {tableData.map((data, index) => (
                     <>
                       <DirectionsRenderer
-                        directions={data.drivingDirections}
+                        directions={data.mapDirections}
                         options={{ markerOptions: { visible: false } }}
                       />
                       <Marker
@@ -310,53 +373,104 @@ const Widget = () => {
             {/* Address To Div */}
             <div className="col-span-2">
               {/* Address To Form */}
+              <div className="grid grid-cols-2">
+                <div className="grid pt-32 mt-2">
+                  <h3>To</h3>
+                  {errors.addressTo ? (
+                    <p className="text-red-500 text-sm font-light ">
+                      Add a location you visit often first
+                    </p>
+                  ) : (
+                    <p className="font-light text-sm">
+                      Add a location you visit often
+                    </p>
+                  )}
+                  <div className="flex flex-row items-center">
+                    <Autocomplete bounds={bounds}>
+                      <input
+                        type="text"
+                        id="addressTo"
+                        placeholder="Taronga Zoo Sydney, Bradleys Head Road, Mosman NSW, Australia"
+                        className="py-2 px-4 my-4 w-72 text-typography-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-300"
+                        {...register("addressTo", {
+                          required: true,
+                        })}
+                      />
+                    </Autocomplete>
+                    {loading ? (
+                      <button
+                        disabled
+                        key="disabled-button"
+                        className="py-2 px-4 mx-6 my-4 w-24 bg-primary-300 text-white rounded-lg hover:bg-opacity-90 active:bg-opacity-100"
+                      >
+                        <ClimbingBoxLoader
+                          className="mr-2"
+                          color={"#ffffff"}
+                          loading={loading}
+                          size={15}
+                        />
+                      </button>
+                    ) : (
+                      <button
+                        key="add-button"
+                        className="py-2 px-4 mx-6 my-4 w-24 bg-primary-300 text-white rounded-lg hover:bg-opacity-90 active:bg-opacity-100"
+                        type="submit"
+                        value="Add"
+                      >
+                        Add
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-col text-sm pt-28 my-2">
+                  <h3 className="text-right">Options</h3>
+                  <div className="flex flex-row items-center justify-end">
+                    <p className="mr-4">
+                      Choose your preferred mode of transport
+                    </p>
+                    <select
+                      defaultValue="BICYCLING"
+                      className="py-2 px-4 my-2 w-32 text-typography-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-300"
+                      {...register("preferredTravelMode", { required: true })}
+                    >
+                      <option value="WALKING">Walk</option>
+                      <option value="BICYCLING">Cycle</option>
+                      <option value="DRIVING">Drive</option>
+                      <option value="TRANSIT">Public Transport</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-row items-center justify-end">
+                    <p className="mr-4">Choose your travel direction</p>
+                    <select
+                      defaultValue="From Home"
+                      className="py-2 px-4 my-2 w-32 text-typography-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-300"
+                      {...register("travelDirection", { required: true })}
+                    >
+                      <option value="From Home">From Home</option>
+                      <option value="To Home">To Home</option>
+                    </select>
+                  </div>
+                  {/* <div className="flex flex-row items-center justify-end">
+                    <p className="mr-4">Select a travel time</p>
+                    <div className="mr-2">
+                      <select
+                        defaultValue="Depart At"
+                        className="py-2 px-4 my-2 w-32 text-typography-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-300"
+                        {...register("travelTimeRule", { required: true })}
+                      >
+                        <option value="Depart At">Depart At</option>
+                        <option value="Arrive By">Arrive By</option>
+                      </select>
+                    </div>
 
-              <h3>To</h3>
-              {errors.addressTo ? (
-                <p className="text-red-500 text-sm font-light ">
-                  Add a location you visit often first
-                </p>
-              ) : (
-                <p className="font-light text-sm">
-                  Add a location you visit often
-                </p>
-              )}
-
-              <div className="flex flex-row items-center">
-                <Autocomplete bounds={bounds}>
-                  <input
-                    type="text"
-                    id="addressTo"
-                    placeholder="Taronga Zoo Sydney, Bradleys Head Road, Mosman NSW, Australia"
-                    className="py-2 px-4 my-4 w-72 text-typography-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-300"
-                    {...register("addressTo", {
-                      required: true,
-                    })}
-                  />
-                </Autocomplete>
-                {loading ? (
-                  <button
-                    disabled
-                    key="disabled-button"
-                    className="py-2 px-4 mx-6 my-4 w-24 bg-primary-300 text-white rounded-lg hover:bg-opacity-90 active:bg-opacity-100"
-                  >
-                    <ClimbingBoxLoader
-                      className="mr-2"
-                      color={"#ffffff"}
-                      loading={loading}
-                      size={15}
+                    <input
+                      type="datetime-local"
+                      className="py-2 px-4 my-2 w-64 text-typography-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-300"
+                      placeholder="Travel Time"
+                      {...register("travelTime", {})}
                     />
-                  </button>
-                ) : (
-                  <button
-                    key="add-button"
-                    className="py-2 px-4 mx-6 my-4 w-24 bg-primary-300 text-white rounded-lg hover:bg-opacity-90 active:bg-opacity-100"
-                    type="submit"
-                    value="Add"
-                  >
-                    Add
-                  </button>
-                )}
+                  </div> */}
+                </div>
               </div>
 
               {/* Content Div */}
@@ -423,7 +537,10 @@ const Widget = () => {
                             <td className="contents-center">
                               <TiDelete
                                 onClick={() =>
-                                  deleteAddressFromTable(row.values.addressTo)
+                                  deleteAddressFromTable(
+                                    row.values.addressTo,
+                                    row.values.travelDirection
+                                  )
                                 }
                                 className="h-8 w-8 m-2 hover:opacity-80 active:opacity-100"
                               ></TiDelete>
@@ -435,6 +552,7 @@ const Widget = () => {
                                 return (
                                   <td
                                     className=" p-4 "
+                                    key={index}
                                     {...cell.getCellProps()}
                                   >
                                     {
