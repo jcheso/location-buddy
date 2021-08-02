@@ -8,7 +8,6 @@ import {
   Autocomplete,
   DirectionsRenderer,
 } from "@react-google-maps/api";
-
 import {
   TiArrowUnsorted,
   TiArrowSortedUp,
@@ -17,10 +16,10 @@ import {
 } from "react-icons/ti";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { usePromiseTracker } from "react-promise-tracker";
-import { trackPromise } from "react-promise-tracker";
 import homeIcon from "../assets/images/baseline_home_black_36dp.png";
 import locationIcon from "../assets/images/baseline_place_black_36dp.png";
+import ClimbingBoxLoader from "react-spinners/ClipLoader";
+
 /*global google*/
 
 const schema = yup.object().shape({
@@ -29,14 +28,14 @@ const schema = yup.object().shape({
 });
 
 const Widget = () => {
-  const { promiseInProgress } = usePromiseTracker();
   const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
   const GEOCODING_API_KEY = process.env.REACT_APP_GEOCODING_API_KEY;
 
   const containerStyle = {
-    width: "390px",
-    height: "390px",
+    width: "405px",
+    height: "405px",
   };
+
   const libraries = ["places"];
 
   // Set default center
@@ -61,6 +60,9 @@ const Widget = () => {
 
   //Create state to track results for table
   const [tableData, setTableData] = React.useState([]);
+
+  //Create state to track loading of results
+  const [loading, setLoading] = React.useState(false);
 
   // Declare and Memoize columns for React table
   const columns = React.useMemo(
@@ -116,29 +118,34 @@ const Widget = () => {
     const geoObj = await fetch(
       `https://maps.googleapis.com/maps/api/geocode/json?address=${addressFrom}&key=${GEOCODING_API_KEY}`
     );
+
     const geoData = await geoObj.json();
     return geoData.results[0].geometry.location;
   };
 
-  const setAddressFrom = async (addressFrom) => {
-    // Remove data that is for different "From" address
-    tableData.forEach((data) => {
-      // Check if the data object addressFrom = new addressFrom
-      if (data.addressFrom !== addressFrom) {
-        deleteAddressFromTable(addressFrom);
-      }
-    });
-    // Get Coords of address and update Google map center property.
-    const coords = await getCoords(addressFrom);
-    setCenter(coords);
-    setBounds({
-      east: coords.lng + radius,
-      north: coords.lat + radius,
-      south: coords.lat - radius,
-      west: coords.lng - radius,
-    });
-    //Set new addressFrom state
-    setAddressFromState(addressFrom);
+  const setAddressFrom = async (newAddressFrom) => {
+    if (addressFrom !== newAddressFrom) {
+      // Remove data that is for different "From" address
+      tableData.forEach((data) => {
+        // Check if the data object addressFrom = new addressFrom
+        if (data.addressFrom !== newAddressFrom) {
+          deleteAddressFromTable(newAddressFrom);
+        }
+      });
+      // Get Coords of address and update Google map center property.
+      const coords = await getCoords(newAddressFrom);
+      setCenter(coords);
+      setBounds({
+        east: coords.lng + radius,
+        north: coords.lat + radius,
+        south: coords.lat - radius,
+        west: coords.lng - radius,
+      });
+      //Set new addressFrom state
+      setAddressFromState(newAddressFrom);
+    } else {
+      alert("You've already selected this address");
+    }
   };
 
   const getDirections = async (addressFrom, addressTo, travelMode) => {
@@ -163,6 +170,7 @@ const Widget = () => {
       ) {
         const travelModes = ["WALKING", "BICYCLING", "DRIVING", "TRANSIT"];
         const directionsData = [];
+        setLoading(true);
         for (let index = 0; index < travelModes.length; index++) {
           try {
             const directions = await getDirections(
@@ -172,6 +180,7 @@ const Widget = () => {
             );
             directionsData.push(directions);
           } catch (error) {
+            setLoading(false);
             alert("There is no route between these locations");
             break;
           }
@@ -187,6 +196,7 @@ const Widget = () => {
           TRANSIT: directionsData[3].routes[0].legs[0].duration.text,
         };
         setTableData((oldTableData) => [...oldTableData, newTableObj]);
+        setLoading(false);
       } else if (tableData.length >= 6) {
         alert("You can only compare six locations at a time");
       } else if (getIndexOfAddress(formData.addressTo) !== -1) {
@@ -252,7 +262,7 @@ const Widget = () => {
                 </Autocomplete>
 
                 <button
-                  className="py-2 px-4 mx-6 my-4 bg-primary-300 text-white rounded-lg hover:bg-opacity-90 active:bg-opacity-100"
+                  className="py-2 px-4 mx-6 my-4 w-24 bg-primary-300 text-white rounded-lg hover:bg-opacity-90 active:bg-opacity-100"
                   type="button"
                   value="Select"
                   onClick={async () => {
@@ -274,7 +284,6 @@ const Widget = () => {
                   mapContainerStyle={containerStyle}
                   center={center}
                   zoom={12}
-                  options={{ style: {} }}
                 >
                   {addressFrom && <Marker icon={homeIcon} position={center} />}
 
@@ -325,14 +334,27 @@ const Widget = () => {
                     })}
                   />
                 </Autocomplete>
-
-                <button
-                  className="py-2 px-4 mx-6 my-4 bg-primary-300 text-white rounded-lg hover:bg-opacity-90 active:bg-opacity-100"
-                  type="submit"
-                  value="Add"
-                >
-                  Add
-                </button>
+                {loading ? (
+                  <button
+                    disabled
+                    className="py-2 px-4 mx-6 my-4 w-24 bg-primary-300 text-white rounded-lg hover:bg-opacity-90 active:bg-opacity-100"
+                  >
+                    <ClimbingBoxLoader
+                      className="mr-2"
+                      color={"#ffffff"}
+                      loading={loading}
+                      size={15}
+                    />
+                  </button>
+                ) : (
+                  <button
+                    className="py-2 px-4 mx-6 my-4 w-24 bg-primary-300 text-white rounded-lg hover:bg-opacity-90 active:bg-opacity-100"
+                    type="submit"
+                    value="Add"
+                  >
+                    Add
+                  </button>
+                )}
               </div>
 
               {/* Content Div */}
@@ -385,10 +407,6 @@ const Widget = () => {
                   </thead>
                   {/* Apply the table body props */}
                   <tbody {...getTableBodyProps()}>
-                    {promiseInProgress && (
-                      <h1>Hey some async call in progress ! </h1>
-                    )}
-                    );
                     {
                       // Loop over the table rows
                       rows.map((row) => {
