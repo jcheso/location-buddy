@@ -16,9 +16,9 @@ import {
 } from "react-icons/ti";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import ClimbingBoxLoader from "react-spinners/ClipLoader";
 import homeIcon from "../assets/images/baseline_home_black_36dp.png";
 import locationIcon from "../assets/images/baseline_place_black_36dp.png";
-import ClimbingBoxLoader from "react-spinners/ClipLoader";
 
 /*global google*/
 
@@ -27,9 +27,9 @@ const schema = yup.object().shape({
   addressTo: yup.string().required(),
 });
 
-const Widget = () => {
-  const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
-  const GEOCODING_API_KEY = process.env.REACT_APP_GEOCODING_API_KEY;
+const LocationBuddy = () => {
+  const GOOGLE_API_KEY = process.env.GATSBY_GOOGLE_API_KEY;
+  const GEOCODING_API_KEY = process.env.GATSBY_GEOCODING_API_KEY;
   const containerStyle = {
     width: "405px",
     height: "405px",
@@ -289,7 +289,88 @@ const Widget = () => {
 
   return (
     <LoadScript googleMapsApiKey={GOOGLE_API_KEY} libraries={libraries}>
-      <main className="w-auto rounded-xl bg-tertiary-100 border-2 border-typography-200 shadow-xl">
+      {/* <body className="bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 body-bg min-h-screen pt-12 md:pt-20 pb-6 px-2 md:px-0">
+        <header className="max-w-lg mx-auto">
+          <a href="#">
+            <h1 className="text-4xl font-bold text-white text-center">
+              LocationBuddy
+            </h1>
+          </a>
+        </header>
+
+        <main className="bg-white max-w-lg mx-auto p-8 md:p-12 my-10 rounded-lg shadow-2xl">
+          <section>
+            <h3 className="font-bold text-2xl">Welcome to Startup</h3>
+            <p className="text-gray-600 pt-2">Sign in to your account.</p>
+          </section>
+
+          <section className="mt-10">
+            <form className="flex flex-col" method="POST" action="#">
+              <div className="mb-6 pt-3 rounded bg-gray-200">
+                <label
+                  className="block text-gray-700 text-sm font-bold mb-2 ml-3"
+                  for="email"
+                >
+                  Email
+                </label>
+                <input
+                  type="text"
+                  id="email"
+                  className="bg-gray-200 rounded w-full text-gray-700 focus:outline-none border-b-4 border-gray-300 focus:border-purple-600 transition duration-500 px-3 pb-3"
+                />
+              </div>
+              <div className="mb-6 pt-3 rounded bg-gray-200">
+                <label
+                  className="block text-gray-700 text-sm font-bold mb-2 ml-3"
+                  for="password"
+                >
+                  Password
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  className="bg-gray-200 rounded w-full text-gray-700 focus:outline-none border-b-4 border-gray-300 focus:border-purple-600 transition duration-500 px-3 pb-3"
+                />
+              </div>
+              <div className="flex justify-end">
+                <a
+                  href="#"
+                  className="text-sm text-purple-600 hover:text-purple-700 hover:underline mb-6"
+                >
+                  Forgot your password?
+                </a>
+              </div>
+              <button
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded shadow-lg hover:shadow-xl transition duration-200"
+                type="submit"
+              >
+                Sign In
+              </button>
+            </form>
+          </section>
+        </main>
+
+        <div className="max-w-lg mx-auto text-center mt-12 mb-6">
+          <p className="text-white">
+            Don't have an account?{" "}
+            <a href="#" className="font-bold hover:underline">
+              Sign up
+            </a>
+            .
+          </p>
+        </div>
+
+        <footer className="max-w-lg mx-auto flex justify-center text-white">
+          <a href="#" className="hover:underline">
+            Contact
+          </a>
+          <span className="mx-3">•</span>
+          <a href="#" className="hover:underline">
+            Privacy
+          </a>
+        </footer>
+      </body> */}
+      <main className="relative flex-grow pt-20 bg-tertiary-100">
         {/* Form Div */}
         <form onSubmit={handleSubmit(addAddressTo)}>
           <div className="mx-8 grid grid-cols-3 justify-between">
@@ -578,4 +659,4 @@ const Widget = () => {
   );
 };
 
-export default Widget;
+export default LocationBuddy;

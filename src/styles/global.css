@@ -9,12 +9,6 @@
     @apply font-Mulish;
     @apply text-typography-200;
   }
-  /* p {
-        @apply font-pt-serif;
-        @apply leading-relaxed;
-        @apply text-gray-900;
-        @apply pb-2;
-    } */
   h1 {
     @apply font-Mulish;
     @apply text-5xl;
