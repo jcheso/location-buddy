@@ -36,7 +36,7 @@ const Widget = () => {
     height: "405px",
   };
 
-  const libraries = ["places"];
+  const [libraries] = useState(["places"]);
 
   // Set default center
   const [center, setCenter] = useState({
@@ -337,6 +337,7 @@ const Widget = () => {
                 {loading ? (
                   <button
                     disabled
+                    key="disabled-button"
                     className="py-2 px-4 mx-6 my-4 w-24 bg-primary-300 text-white rounded-lg hover:bg-opacity-90 active:bg-opacity-100"
                   >
                     <ClimbingBoxLoader
@@ -348,6 +349,7 @@ const Widget = () => {
                   </button>
                 ) : (
                   <button
+                    key="add-button"
                     className="py-2 px-4 mx-6 my-4 w-24 bg-primary-300 text-white rounded-lg hover:bg-opacity-90 active:bg-opacity-100"
                     type="submit"
                     value="Add"
