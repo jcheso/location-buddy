@@ -4,13 +4,20 @@ module.exports = {
   siteMetadata: {
     siteUrl: "https://www.locationbuddy.tech",
     title: "Location Buddy",
-    description: "We help you find the perfectly located home",
+    description: "Here to find you the perfectly placed home.",
     author: "Jarryd Cheso",
-    keywords: "real estate, home, location, google maps",
-    image: "src/images/icon.png",
+    keywords:
+      "real estate, home, location, google maps, directions, renting, house, buying, flatshare",
+    image: "src/images/android-chrome-512x512.png",
   },
   plugins: [
     "gatsby-plugin-image",
+    {
+      resolve: `gatsby-plugin-google-adsense`,
+      options: {
+        publisherId: `ca-pub-4440017294340120`,
+      },
+    },
     {
       resolve: `gatsby-plugin-google-gtag`,
       options: {
@@ -36,10 +43,10 @@ module.exports = {
         name: "Location Buddy",
         short_name: "Location Buddy",
         start_url: "/",
-        background_color: "#90BEDE",
-        theme_color: "#334A5A",
+        background_color: "#f56565",
+        theme_color: "#dcdee2",
         display: "standalone",
-        icon: "src/assets/images/logo.png", // This path is relative to the root of the site.
+        icon: "src/assets/images/smile-icon-2.png", // This path is relative to the root of the site.
       },
     },
     "gatsby-plugin-sharp",

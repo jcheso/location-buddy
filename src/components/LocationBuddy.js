@@ -14,12 +14,24 @@ import {
   TiArrowSortedDown,
   TiDelete,
 } from "react-icons/ti";
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaGithub,
+  FaLinkedinIn,
+} from "react-icons/fa";
+import {
+  IoLocationOutline,
+  IoHomeOutline,
+  IoSettingsOutline,
+} from "react-icons/io5";
+import { OutboundLink } from "gatsby-plugin-google-analytics";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import ClimbingBoxLoader from "react-spinners/ClipLoader";
+import PulseLoader from "react-spinners/ClipLoader";
 import homeIcon from "../assets/images/baseline_home_black_36dp.png";
 import locationIcon from "../assets/images/baseline_place_black_36dp.png";
-
+import smileIcon from "../assets/images/smile-icon-2.png";
 /*global google*/
 
 const schema = yup.object().shape({
@@ -31,8 +43,14 @@ const LocationBuddy = () => {
   const GOOGLE_API_KEY = process.env.GATSBY_GOOGLE_API_KEY;
   const GEOCODING_API_KEY = process.env.GATSBY_GEOCODING_API_KEY;
   const containerStyle = {
-    width: "405px",
-    height: "405px",
+    width: "100%",
+    height: "100%",
+    // frameborder: "0",
+    // marginheight: "0",
+    // marginwidth: "0",
+    // title: "map",
+    // scrolling: "no",
+    // style: "filter: grayscale(1) contrast(1.2) opacity(0.4);",
   };
   // Register React Hook Form
   const {
@@ -69,10 +87,10 @@ const LocationBuddy = () => {
   // Declare and Memoize columns for React table
   const columns = React.useMemo(
     () => [
-      {
-        Header: "Direction",
-        accessor: "travelDirection", // accessor is the "key" in the data
-      },
+      // {
+      //   Header: "Direction",
+      //   accessor: "travelDirection", // accessor is the "key" in the data
+      // },
       {
         Header: "Location",
         accessor: "addressTo", // accessor is the "key" in the data
@@ -90,7 +108,7 @@ const LocationBuddy = () => {
         accessor: "DRIVING",
       },
       {
-        Header: "Public Transport",
+        Header: "Transit",
         accessor: "TRANSIT",
       },
     ],
@@ -289,372 +307,340 @@ const LocationBuddy = () => {
 
   return (
     <LoadScript googleMapsApiKey={GOOGLE_API_KEY} libraries={libraries}>
-      {/* <body className="bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 body-bg min-h-screen pt-12 md:pt-20 pb-6 px-2 md:px-0">
-        <header className="max-w-lg mx-auto">
-          <a href="#">
-            <h1 className="text-4xl font-bold text-white text-center">
-              LocationBuddy
-            </h1>
+      {/* Header */}
+      <header class="text-gray-600 body-font">
+        <div className="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
+          <a class="flex title-font font-medium items-center text-gray-900 mb-4 md:mb-0">
+            <img src={smileIcon} className="h-10 w-10"></img>
+            <span className="ml-3 text-xl font-fredokaOne">LocationBuddy</span>
           </a>
-        </header>
-
-        <main className="bg-white max-w-lg mx-auto p-8 md:p-12 my-10 rounded-lg shadow-2xl">
-          <section>
-            <h3 className="font-bold text-2xl">Welcome to Startup</h3>
-            <p className="text-gray-600 pt-2">Sign in to your account.</p>
-          </section>
-
-          <section className="mt-10">
-            <form className="flex flex-col" method="POST" action="#">
-              <div className="mb-6 pt-3 rounded bg-gray-200">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2 ml-3"
-                  for="email"
-                >
-                  Email
-                </label>
-                <input
-                  type="text"
-                  id="email"
-                  className="bg-gray-200 rounded w-full text-gray-700 focus:outline-none border-b-4 border-gray-300 focus:border-purple-600 transition duration-500 px-3 pb-3"
-                />
-              </div>
-              <div className="mb-6 pt-3 rounded bg-gray-200">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2 ml-3"
-                  for="password"
-                >
-                  Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  className="bg-gray-200 rounded w-full text-gray-700 focus:outline-none border-b-4 border-gray-300 focus:border-purple-600 transition duration-500 px-3 pb-3"
-                />
-              </div>
-              <div className="flex justify-end">
-                <a
-                  href="#"
-                  className="text-sm text-purple-600 hover:text-purple-700 hover:underline mb-6"
-                >
-                  Forgot your password?
-                </a>
-              </div>
-              <button
-                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded shadow-lg hover:shadow-xl transition duration-200"
-                type="submit"
-              >
-                Sign In
-              </button>
-            </form>
-          </section>
-        </main>
-
-        <div className="max-w-lg mx-auto text-center mt-12 mb-6">
-          <p className="text-white">
-            Don't have an account?{" "}
-            <a href="#" className="font-bold hover:underline">
-              Sign up
-            </a>
-            .
-          </p>
+          <nav class="md:mr-auto md:ml-4 md:py-1 md:pl-4 md:border-l md:border-gray-400	flex flex-wrap items-center text-base justify-center text-center">
+            Here to find you the perfectly placed home
+          </nav>
         </div>
+      </header>
 
-        <footer className="max-w-lg mx-auto flex justify-center text-white">
-          <a href="#" className="hover:underline">
-            Contact
-          </a>
-          <span className="mx-3">•</span>
-          <a href="#" className="hover:underline">
-            Privacy
-          </a>
-        </footer>
-      </body> */}
-      <main className="relative flex-grow pt-20 bg-tertiary-100">
-        {/* Form Div */}
-        <form onSubmit={handleSubmit(addAddressTo)}>
-          <div className="mx-8 grid grid-cols-3 justify-between">
-            <div className="col-span-1">
-              {/* Heading Div */}
-              <div className="my-6 items-center">
-                <h1>Location Buddy</h1>
-                <h2 className="my-2 font-extralight">
-                  We help you find the perfectly located home
-                </h2>
-              </div>
-              {/* Address From Section */}
+      <section class="text-gray-600 body-font relative">
+        <div class="absolute inset-0 bg-gray-300">
+          <GoogleMap
+            mapContainerStyle={containerStyle}
+            center={{ lat: center.lat, lng: center.lng + 0.1 }}
+            zoom={12}
+          >
+            {addressFrom && <Marker icon={homeIcon} position={center} />}
 
-              <h3>From</h3>
-              {errors.addressFrom ? (
-                <p className="text-red-500 text-sm font-light ">
-                  Select the address you're interested in first
-                </p>
-              ) : (
-                <p className="font-light text-sm">
-                  Select the address you're interested in
-                </p>
-              )}
-              <div className="flex flex-row items-center">
-                <Autocomplete bounds={bounds}>
-                  <input
-                    type="text"
-                    id="addressFrom"
-                    placeholder="Kirribilli House, Kirribilli Avenue, Kirribilli NSW, Australia"
-                    className="py-2 px-4 my-4 w-72 text-typography-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-300"
-                    {...register("addressFrom", { required: true })}
-                  />
-                </Autocomplete>
-
-                <button
-                  className="py-2 px-4 mx-6 my-4 w-24 bg-primary-300 text-white rounded-lg hover:bg-opacity-90 active:bg-opacity-100"
-                  type="button"
-                  value="Select"
-                  onClick={async () => {
-                    await trigger("addressFrom").then((data) => {
-                      if (data) {
-                        const addressFrom = getValues("addressFrom");
-                        setAddressFrom(addressFrom);
-                      }
-                    });
+            {tableData.map((data, index) => (
+              <>
+                <DirectionsRenderer
+                  directions={data.mapDirections}
+                  options={{ markerOptions: { visible: false } }}
+                />
+                <Marker
+                  key={index}
+                  icon={{
+                    url: locationIcon,
+                    scaledSize: new window.google.maps.Size(35, 35),
                   }}
-                >
-                  Select
-                </button>
-              </div>
-
-              {/* Map */}
-              <div className="my-4">
-                <GoogleMap
-                  mapContainerStyle={containerStyle}
-                  center={center}
-                  zoom={12}
-                >
-                  {addressFrom && <Marker icon={homeIcon} position={center} />}
-
-                  {tableData.map((data, index) => (
-                    <>
-                      <DirectionsRenderer
-                        directions={data.mapDirections}
-                        options={{ markerOptions: { visible: false } }}
-                      />
-                      <Marker
-                        key={index}
-                        icon={{
-                          url: locationIcon,
-                          scaledSize: new window.google.maps.Size(35, 35),
-                        }}
-                        position={data.addressToCoords}
-                      />
-                    </>
-                  ))}
-                </GoogleMap>
-              </div>
+                  position={data.addressToCoords}
+                />
+              </>
+            ))}
+          </GoogleMap>
+        </div>
+        <div class="container px-5 py-12 mx-auto flex text-gray-600 body-font">
+          <div class="lg:w-1/2 bg-white rounded-lg p-8 flex flex-col md:ml-auto w-full mt-10 md:mt-0 relative z-10 shadow-md h-1/2">
+            <h2 class="text-gray-900 text-lg mb-1 font-medium title-font">
+              Your Travel Summary
+            </h2>
+            <div className="w-full h-96 mx-auto overflow-auto">
+              <table
+                className="table-auto w-full text-left whitespace-no-wrap"
+                {...getTableProps()}
+              >
+                <thead>
+                  {
+                    // Loop over the header rows
+                    headerGroups.map((headerGroup) => (
+                      // Apply the header row props
+                      <tr {...headerGroup.getHeaderGroupProps()}>
+                        <th className="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl"></th>
+                        {
+                          // Loop over the headers in each row
+                          headerGroup.headers.map((column, index) => (
+                            // Apply the header cell props
+                            <th
+                              className={
+                                index === headerGroup.headers.length - 1
+                                  ? "px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tr rounded-br"
+                                  : "px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
+                              }
+                              {...column.getHeaderProps(
+                                column.getSortByToggleProps()
+                              )}
+                            >
+                              <div className="flex flex-row items-center">
+                                {
+                                  // Render the header
+                                  column.render("Header")
+                                }
+                                <span className="pl-1">
+                                  {column.isSorted ? (
+                                    column.isSortedDesc ? (
+                                      <TiArrowSortedDown />
+                                    ) : (
+                                      <TiArrowSortedUp />
+                                    )
+                                  ) : (
+                                    <TiArrowUnsorted />
+                                  )}
+                                </span>
+                              </div>
+                            </th>
+                          ))
+                        }
+                      </tr>
+                    ))
+                  }
+                </thead>
+                {/* Apply the table body props */}
+                <tbody {...getTableBodyProps()}>
+                  {
+                    // Loop over the table rows
+                    rows.map((row) => {
+                      // Prepare the row for display
+                      prepareRow(row);
+                      return (
+                        // Apply the row props
+                        <tr className="" {...row.getRowProps()}>
+                          <td className="border-t-2 border-b-2 border-gray-200 px-4 py-3 ">
+                            <TiDelete
+                              onClick={() =>
+                                deleteAddressFromTable(
+                                  row.values.addressTo,
+                                  row.values.travelDirection
+                                )
+                              }
+                              className="h-6 w-6 hover:opacity-80 active:opacity-100"
+                            ></TiDelete>
+                          </td>
+                          {
+                            // Loop over the rows cells
+                            row.cells.map((cell, index) => {
+                              // Apply the cell props
+                              return (
+                                <td
+                                  className="border-t-2 border-b-2 border-gray-200 px-4 py-3 text-sm"
+                                  key={index}
+                                  {...cell.getCellProps()}
+                                >
+                                  {
+                                    // Render the cell contents
+                                    cell.render("Cell")
+                                  }
+                                </td>
+                              );
+                            })
+                          }
+                        </tr>
+                      );
+                    })
+                  }
+                </tbody>
+              </table>
             </div>
-
-            {/* Address To Div */}
-            <div className="col-span-2">
-              {/* Address To Form */}
-              <div className="grid grid-cols-2">
-                <div className="grid pt-32 mt-2">
-                  <h3>To</h3>
-                  {errors.addressTo ? (
-                    <p className="text-red-500 text-sm font-light ">
-                      Add a location you visit often first
-                    </p>
-                  ) : (
-                    <p className="font-light text-sm">
-                      Add a location you visit often
-                    </p>
-                  )}
-                  <div className="flex flex-row items-center">
-                    <Autocomplete bounds={bounds}>
-                      <input
-                        type="text"
-                        id="addressTo"
-                        placeholder="Taronga Zoo Sydney, Bradleys Head Road, Mosman NSW, Australia"
-                        className="py-2 px-4 my-4 w-72 text-typography-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-300"
-                        {...register("addressTo", {
-                          required: true,
-                        })}
-                      />
-                    </Autocomplete>
+          </div>
+        </div>
+      </section>
+      <section className="text-gray-600 body-font">
+        <form onSubmit={handleSubmit(addAddressTo)}>
+          <div className="container px-5 py-12 mx-auto">
+            <div className="flex flex-wrap sm:-m-4 -mx-4 -mb-10 -mt-4 md:space-y-0 space-y-6">
+              <div className="p-4 md:w-1/3 flex">
+                <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500 mb-4 flex-shrink-0">
+                  <IoHomeOutline className="w-6 h-6"></IoHomeOutline>
+                </div>
+                <div className="flex-grow pl-6">
+                  <h2 className="text-gray-900 text-lg title-font font-medium mb-2">
+                    Your Potential Home
+                  </h2>
+                  <p
+                    className={
+                      (errors.addressFrom ? "text-red-500" : "text-gray-600") +
+                      "leading-relaxed text-base"
+                    }
+                  >
+                    Select the address you're interested in.
+                  </p>
+                  <div className="mt-3 text-red-500 inline-flex items-center">
+                    <div className="relative mr-4 lg:w-full w-2/4 md:w-full text-left">
+                      <Autocomplete bounds={bounds}>
+                        <input
+                          type="text"
+                          id="addressFrom"
+                          placeholder="Kirribilli House, Kirribilli Avenue, Kirribilli NSW, Australia"
+                          className="w-full bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                          {...register("addressFrom", { required: true })}
+                        />
+                      </Autocomplete>
+                    </div>
+                    <button
+                      className="inline-flex text-center text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg"
+                      type="button"
+                      value="Select"
+                      onClick={async () => {
+                        await trigger("addressFrom").then((data) => {
+                          if (data) {
+                            const addressFrom = getValues("addressFrom");
+                            setAddressFrom(addressFrom);
+                          }
+                        });
+                      }}
+                    >
+                      Select
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 md:w-1/3 flex">
+                <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500 mb-4 flex-shrink-0">
+                  <IoLocationOutline className="w-6 h-6"></IoLocationOutline>
+                </div>
+                <div className="flex-grow pl-6">
+                  <h2 className="text-gray-900 text-lg title-font font-medium mb-2">
+                    Your Frequent Destination
+                  </h2>
+                  <p
+                    className={
+                      (errors.addressTo ? "text-red-500" : "text-gray-600") +
+                      "leading-relaxed text-base"
+                    }
+                  >
+                    Select a location you'll be visiting often.
+                  </p>
+                  <div className="mt-3 text-red-500 inline-flex items-center">
+                    <div className="relative mr-4 lg:w-full w-2/4 md:w-full text-left">
+                      <Autocomplete bounds={bounds}>
+                        <input
+                          type="text"
+                          id="addressTo"
+                          placeholder="Taronga Zoo Sydney, Bradleys Head Road, Mosman NSW, Australia"
+                          className="w-full bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                          {...register("addressTo", {
+                            required: true,
+                          })}
+                        />
+                      </Autocomplete>
+                    </div>
                     {loading ? (
                       <button
                         disabled
                         key="disabled-button"
-                        className="py-2 px-4 mx-6 my-4 w-24 bg-primary-300 text-white rounded-lg hover:bg-opacity-90 active:bg-opacity-100"
+                        className="inline-flex w-32 text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg"
                       >
-                        <ClimbingBoxLoader
-                          className="mr-2"
+                        <PulseLoader
+                          className="inline-flex w-32 text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg"
                           color={"#ffffff"}
                           loading={loading}
-                          size={15}
+                          height={15}
+                          margin={2}
                         />
                       </button>
                     ) : (
                       <button
                         key="add-button"
-                        className="py-2 px-4 mx-6 my-4 w-24 bg-primary-300 text-white rounded-lg hover:bg-opacity-90 active:bg-opacity-100"
+                        className="inline-flex text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg"
                         type="submit"
                         value="Add"
                       >
-                        Add
+                        Select
                       </button>
                     )}
                   </div>
                 </div>
-                <div className="flex flex-col text-sm pt-28 my-2">
-                  <h3 className="text-right">Options</h3>
-                  <div className="flex flex-row items-center justify-end">
-                    <p className="mr-4">
-                      Choose your preferred mode of transport
-                    </p>
-                    <select
-                      defaultValue="BICYCLING"
-                      className="py-2 px-4 my-2 w-32 text-typography-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-300"
-                      {...register("preferredTravelMode", { required: true })}
-                    >
-                      <option value="WALKING">Walk</option>
-                      <option value="BICYCLING">Cycle</option>
-                      <option value="DRIVING">Drive</option>
-                      <option value="TRANSIT">Public Transport</option>
-                    </select>
-                  </div>
-                  <div className="flex flex-row items-center justify-end">
-                    <p className="mr-4">Choose your travel direction</p>
-                    <select
-                      defaultValue="From Home"
-                      className="py-2 px-4 my-2 w-32 text-typography-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-300"
-                      {...register("travelDirection", { required: true })}
-                    >
-                      <option value="From Home">From Home</option>
-                      <option value="To Home">To Home</option>
-                    </select>
-                  </div>
-                  {/* <div className="flex flex-row items-center justify-end">
-                    <p className="mr-4">Select a travel time</p>
-                    <div className="mr-2">
+              </div>
+              <div className="p-4 md:w-1/3 flex">
+                <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500 mb-4 flex-shrink-0">
+                  <IoSettingsOutline className="w-6 h-6"></IoSettingsOutline>
+                </div>
+                <div className="flex-grow pl-6">
+                  <h2 className="text-gray-900 text-lg title-font font-medium mb-2">
+                    Your Commute Settings
+                  </h2>
+                  <p className="leading-relaxed text-base">
+                    Choose your preferred method of transport and travel
+                    direction.
+                  </p>
+                  <div className="mt-3 text-red-500 inline-flex items-center">
+                    <div className="relative mr-4 w-full text-left">
                       <select
-                        defaultValue="Depart At"
-                        className="py-2 px-4 my-2 w-32 text-typography-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-300"
-                        {...register("travelTimeRule", { required: true })}
+                        defaultValue="BICYCLING"
+                        className="w-42 bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                        {...register("preferredTravelMode", { required: true })}
                       >
-                        <option value="Depart At">Depart At</option>
-                        <option value="Arrive By">Arrive By</option>
+                        <option value="WALKING">Walk</option>
+                        <option value="BICYCLING">Cycle</option>
+                        <option value="DRIVING">Drive</option>
+                        <option value="TRANSIT">Public Transport</option>
+                      </select>
+                      {/* <p className="leading-relaxed text-base">
+                        Choose your direction of travel
+                      </p> */}
+                      <select
+                        defaultValue="From Home"
+                        className="md:ml-3 mt-3 bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                        {...register("travelDirection", { required: true })}
+                      >
+                        <option value="From Home">From Home</option>
+                        <option value="To Home">To Home</option>
                       </select>
                     </div>
-
-                    <input
-                      type="datetime-local"
-                      className="py-2 px-4 my-2 w-64 text-typography-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-300"
-                      placeholder="Travel Time"
-                      {...register("travelTime", {})}
-                    />
-                  </div> */}
+                  </div>
                 </div>
-              </div>
-
-              {/* Content Div */}
-              <div className="w-full">
-                {/* Results Table */}
-                <table
-                  className="table-auto w-full bg-white my-4"
-                  {...getTableProps()}
-                >
-                  <thead className="bg-secondary-100 rounded-lg">
-                    {
-                      // Loop over the header rows
-                      headerGroups.map((headerGroup) => (
-                        // Apply the header row props
-                        <tr {...headerGroup.getHeaderGroupProps()}>
-                          <td className="contents-center"></td>
-                          {
-                            // Loop over the headers in each row
-                            headerGroup.headers.map((column) => (
-                              // Apply the header cell props
-                              <th
-                                className="text-typography-300 font-semibold text-sm p-4 text-center"
-                                {...column.getHeaderProps(
-                                  column.getSortByToggleProps()
-                                )}
-                              >
-                                <div className="flex flex-row items-center justify-end">
-                                  {
-                                    // Render the header
-                                    column.render("Header")
-                                  }
-                                  <span className="pl-1">
-                                    {column.isSorted ? (
-                                      column.isSortedDesc ? (
-                                        <TiArrowSortedDown />
-                                      ) : (
-                                        <TiArrowSortedUp />
-                                      )
-                                    ) : (
-                                      <TiArrowUnsorted />
-                                    )}
-                                  </span>
-                                </div>
-                              </th>
-                            ))
-                          }
-                        </tr>
-                      ))
-                    }
-                  </thead>
-                  {/* Apply the table body props */}
-                  <tbody {...getTableBodyProps()}>
-                    {
-                      // Loop over the table rows
-                      rows.map((row) => {
-                        // Prepare the row for display
-                        prepareRow(row);
-                        return (
-                          // Apply the row props
-                          <tr
-                            className=" border-t border-tertiary-300 font-light text-sm  text-center "
-                            {...row.getRowProps()}
-                          >
-                            <td className="contents-center">
-                              <TiDelete
-                                onClick={() =>
-                                  deleteAddressFromTable(
-                                    row.values.addressTo,
-                                    row.values.travelDirection
-                                  )
-                                }
-                                className="h-8 w-8 m-2 hover:opacity-80 active:opacity-100"
-                              ></TiDelete>
-                            </td>
-                            {
-                              // Loop over the rows cells
-                              row.cells.map((cell, index) => {
-                                // Apply the cell props
-                                return (
-                                  <td
-                                    className=" p-4 "
-                                    key={index}
-                                    {...cell.getCellProps()}
-                                  >
-                                    {
-                                      // Render the cell contents
-                                      cell.render("Cell")
-                                    }
-                                  </td>
-                                );
-                              })
-                            }
-                          </tr>
-                        );
-                      })
-                    }
-                  </tbody>
-                </table>
               </div>
             </div>
           </div>
         </form>
-      </main>
+      </section>
+      <footer className="text-gray-600 body-font">
+        <div className="container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col">
+          <a className="flex title-font font-medium items-center md:justify-start justify-center text-gray-900">
+            <img src={smileIcon} className="h-10 w-10"></img>
+            <span className="ml-3 text-xl font-fredokaOne">LocationBuddy</span>
+          </a>
+          <OutboundLink href="https://www.jarrydcheso.me/">
+            <p className="text-sm text-gray-500 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-200 sm:py-2 sm:mt-0 mt-4">
+              © 2021 Jarryd Cheso
+            </p>
+          </OutboundLink>
+
+          <span className="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
+            <OutboundLink
+              href="https://www.facebook.com/jarryd.cheso"
+              className="text-gray-500"
+            >
+              <FaFacebookF className="w-5 h-5"></FaFacebookF>
+            </OutboundLink>
+            <OutboundLink
+              href="https://www.instagram.com/jarryd711/"
+              className="ml-3 text-gray-500"
+            >
+              <FaInstagram className="w-5 h-5"></FaInstagram>
+            </OutboundLink>
+            <OutboundLink
+              href="https://github.com/jcheso"
+              className="ml-3 text-gray-500"
+            >
+              <FaGithub className="w-5 h-5"></FaGithub>
+            </OutboundLink>
+            <OutboundLink
+              href="https://www.linkedin.com/in/jcheso/"
+              className="ml-3 text-gray-500"
+            >
+              <FaLinkedinIn className="w-5 h-5"></FaLinkedinIn>
+            </OutboundLink>
+          </span>
+        </div>
+      </footer>
     </LoadScript>
   );
 };

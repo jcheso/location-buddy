@@ -19,7 +19,8 @@ module.exports = {
         "typography-300": "#373F41",
       },
       fontFamily: {
-        Mulish: ["Mulish", "sans-serif"],
+        openSans: ["Open Sans"],
+        fredokaOne: ["Fredoka One"],
       },
     },
   },
