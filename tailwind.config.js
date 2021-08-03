@@ -1,5 +1,5 @@
 module.exports = {
-  purge: ["./src/**/*.{js,jsx,ts,tsx}", "./public/index.html"],
+  purge: ["./src/**/*.{js,jsx,ts,tsx}"],
   darkMode: false, // or 'media' or 'class'
   theme: {
     extend: {
@@ -19,7 +19,8 @@ module.exports = {
         "typography-300": "#373F41",
       },
       fontFamily: {
-        Mulish: ["Mulish", "sans-serif"],
+        openSans: ["Open Sans"],
+        fredokaOne: ["Fredoka One"],
       },
     },
   },

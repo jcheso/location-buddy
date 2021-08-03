@@ -1,56 +1,48 @@
 {
-  "name": "how-far-to-app",
-  "version": "0.1.0",
+  "name": "location-buddy",
+  "version": "1.0.0",
   "private": true,
+  "description": "Location Buddy",
+  "author": "Jarryd Cheso",
+  "keywords": [
+    "gatsby"
+  ],
+  "scripts": {
+    "develop": "gatsby develop",
+    "start": "gatsby develop",
+    "build": "gatsby build",
+    "serve": "gatsby serve",
+    "clean": "gatsby clean"
+  },
   "dependencies": {
-    "@babel/core": "^7.14.8",
-    "@craco/craco": "^6.2.0",
-    "@googlemaps/js-api-loader": "^1.12.1",
-    "@hookform/resolvers": "^2.6.1",
+    "@fontsource/fredoka-one": "^4.5.0",
+    "@fontsource/open-sans": "^4.5.0",
+    "@hookform/resolvers": "^2.7.0",
     "@react-google-maps/api": "^2.2.0",
-    "@testing-library/jest-dom": "^5.14.1",
-    "@testing-library/react": "^11.2.7",
-    "@testing-library/user-event": "^12.8.3",
-    "babel-eslint": "^10.1.0",
-    "eslint-config-react-app": "^6.0.0",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-hook-form": "^7.12.1",
+    "gatsby": "^3.10.2",
+    "gatsby-plugin-google-adsense": "^1.1.3",
+    "gatsby-plugin-google-analytics": "^3.10.0",
+    "gatsby-plugin-google-gtag": "^3.10.0",
+    "gatsby-plugin-image": "^1.10.1",
+    "gatsby-plugin-manifest": "^3.10.0",
+    "gatsby-plugin-react-helmet": "^4.10.0",
+    "gatsby-plugin-sharp": "^3.10.2",
+    "gatsby-plugin-sitemap": "^4.6.0",
+    "gatsby-source-filesystem": "^3.10.0",
+    "gatsby-transformer-sharp": "^3.10.0",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-helmet": "^6.1.0",
+    "react-hook-form": "^7.12.2",
     "react-icons": "^4.2.0",
-    "react-scripts": "4.0.3",
     "react-spinners": "^0.11.0",
     "react-table": "^7.7.0",
-    "typescript": "^4.3.5",
-    "web-vitals": "^1.1.2",
     "yup": "^0.32.9"
   },
-  "scripts": {
-    "start": "craco start",
-    "build": "craco build",
-    "test": "craco test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
   "devDependencies": {
-    "autoprefixer": "^9.8.6",
-    "postcss": "^7.0.36",
-    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.2.7"
+    "autoprefixer": "^10.3.1",
+    "gatsby-plugin-postcss": "^4.10.0",
+    "postcss": "^8.3.6",
+    "tailwindcss": "^2.2.7"
   }
 }
