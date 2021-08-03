@@ -5,7 +5,7 @@ import SearchEngineOptimisation from "../components/SearchEngineOptimisation";
 function App() {
   return (
     <main className="flex flex-col justify-between h-screen">
-      <SearchEngineOptimisation></SearchEngineOptimisation>
+      <SearchEngineOptimisation title="Location Buddy"></SearchEngineOptimisation>
       <LocationBuddy></LocationBuddy>
     </main>
   );

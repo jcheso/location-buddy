@@ -87,10 +87,10 @@ const LocationBuddy = () => {
   // Declare and Memoize columns for React table
   const columns = React.useMemo(
     () => [
-      // {
-      //   Header: "Direction",
-      //   accessor: "travelDirection", // accessor is the "key" in the data
-      // },
+      {
+        Header: "",
+        accessor: "travelDirection", // accessor is the "key" in the data
+      },
       {
         Header: "Location",
         accessor: "addressTo", // accessor is the "key" in the data
@@ -239,7 +239,7 @@ const LocationBuddy = () => {
         setLoading(true);
         for (let index = 0; index < travelModes.length; index++) {
           try {
-            if (formData.travelDirection === "From Home") {
+            if (formData.travelDirection === "From") {
               const directions = await getDirections(
                 formData.addressTo,
                 formData.addressFrom,
@@ -248,7 +248,7 @@ const LocationBuddy = () => {
                 // travelTimeRule
               );
               directionsData.push(directions);
-            } else if (formData.travelDirection === "To Home") {
+            } else if (formData.travelDirection === "To") {
               const directions = await getDirections(
                 formData.addressFrom,
                 formData.addressTo,
@@ -383,17 +383,21 @@ const LocationBuddy = () => {
                                   // Render the header
                                   column.render("Header")
                                 }
-                                <span className="pl-1">
-                                  {column.isSorted ? (
-                                    column.isSortedDesc ? (
-                                      <TiArrowSortedDown />
+                                {index > 0 ? (
+                                  <span className="pl-1">
+                                    {column.isSorted ? (
+                                      column.isSortedDesc ? (
+                                        <TiArrowSortedDown />
+                                      ) : (
+                                        <TiArrowSortedUp />
+                                      )
                                     ) : (
-                                      <TiArrowSortedUp />
-                                    )
-                                  ) : (
-                                    <TiArrowUnsorted />
-                                  )}
-                                </span>
+                                      <TiArrowUnsorted />
+                                    )}
+                                  </span>
+                                ) : (
+                                  <span></span>
+                                )}
                               </div>
                             </th>
                           ))
@@ -586,12 +590,12 @@ const LocationBuddy = () => {
                         Choose your direction of travel
                       </p> */}
                       <select
-                        defaultValue="From Home"
+                        defaultValue="To"
                         className="md:ml-3 mt-3 bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
                         {...register("travelDirection", { required: true })}
                       >
-                        <option value="From Home">From Home</option>
-                        <option value="To Home">To Home</option>
+                        <option value="To">From Home</option>
+                        <option value="From">To Home</option>
                       </select>
                     </div>
                   </div>
