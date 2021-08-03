@@ -3,12 +3,12 @@ require("dotenv").config();
 module.exports = {
   siteMetadata: {
     siteUrl: "https://www.locationbuddy.tech",
-    title: "Location Buddy",
+    title: "",
     description: "Here to find you the perfectly placed home.",
     author: "Jarryd Cheso",
     keywords:
       "real estate, home, location, google maps, directions, renting, house, buying, flatshare",
-    image: "src/images/android-chrome-512x512.png",
+    image: "src/assets/images/android-chrome-512x512.png",
   },
   plugins: [
     "gatsby-plugin-image",
