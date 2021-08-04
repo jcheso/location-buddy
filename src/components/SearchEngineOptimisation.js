@@ -28,7 +28,7 @@ function SearchEngineOptimisation({
   );
 
   const metaDescription = description || site.siteMetadata.description;
-  const image = "../assets/images/icon.png";
+  const image = site.siteMetadata.image;
   const canonical = pathname ? `${site.siteMetadata.siteUrl}${pathname}` : null;
 
   return (

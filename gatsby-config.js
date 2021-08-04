@@ -8,7 +8,7 @@ module.exports = {
     author: "Jarryd Cheso",
     keywords:
       "real estate, home, location, google maps, directions, renting, house, buying, flatshare",
-    image: "src/assets/images/android-chrome-512x512.png",
+    image: "src/assets/images/smile-icon-2.png",
   },
   plugins: [
     "gatsby-plugin-image",
