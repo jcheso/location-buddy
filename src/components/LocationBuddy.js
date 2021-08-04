@@ -28,6 +28,12 @@ import {
 import { OutboundLink } from "gatsby-plugin-google-analytics";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import {
+  BrowserView,
+  MobileView,
+  isBrowser,
+  isMobile,
+} from "react-device-detect";
 import HashLoader from "react-spinners/ClipLoader";
 import homeIcon from "../assets/images/baseline_home_black_36dp.png";
 import locationIcon from "../assets/images/baseline_place_black_36dp.png";
@@ -257,6 +263,14 @@ const LocationBuddy = () => {
     });
   };
 
+  const mapProps = {
+    mapContainerStyle: { width: "100%", height: "100%" },
+    center: isMobile
+      ? { lat: center.lat, lng: center.lng }
+      : { lat: center.lat, lng: center.lng + 0.1 },
+    zoom: 12,
+  };
+
   return (
     <LoadScript googleMapsApiKey={GOOGLE_API_KEY} libraries={libraries}>
       {/* Header */}
@@ -271,13 +285,157 @@ const LocationBuddy = () => {
           </nav>
         </div>
       </header>
-
-      <section className="text-gray-600 body-font md:relative">
+      <MobileView>
+        <section className="text-gray-600 body-font">
+          <form onSubmit={handleSubmit(addAddressTo)}>
+            <div className="container px-5 py-4 md:py-12 mx-auto">
+              <div className="flex flex-wrap sm:-m-4 -mx-4 -mb-10 -mt-4 md:space-y-0 space-y-6">
+                <div className="p-4 md:w-1/3 flex">
+                  <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500 mb-4 flex-shrink-0">
+                    <IoHomeOutline className="w-6 h-6"></IoHomeOutline>
+                  </div>
+                  <div className="flex-grow pl-6">
+                    <h2 className="text-gray-900 text-lg title-font font-medium mb-2">
+                      Your Potential Home
+                    </h2>
+                    <p
+                      className={
+                        (errors.addressFrom
+                          ? "text-red-500"
+                          : "text-gray-600") + "leading-relaxed text-base"
+                      }
+                    >
+                      Select the address you're interested in.
+                    </p>
+                    <div className="mt-3 text-red-500 inline-flex items-center justify-start">
+                      <div className="relative mr-4 lg:w-full w-2/4 md:w-full text-left">
+                        <Autocomplete bounds={bounds}>
+                          <input
+                            type="text"
+                            id="addressFrom"
+                            placeholder="Buckingham Palace, London, UK"
+                            className="w-full bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                            {...register("addressFrom", { required: true })}
+                          />
+                        </Autocomplete>
+                      </div>
+                      <button
+                        className="inline-flex text-center text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg"
+                        type="button"
+                        value="Select"
+                        onClick={async () => {
+                          await trigger("addressFrom").then((data) => {
+                            if (data) {
+                              const addressFrom = getValues("addressFrom");
+                              setAddressFrom(addressFrom);
+                            }
+                          });
+                        }}
+                      >
+                        Select
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 md:w-1/3 flex">
+                  <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500 mb-4 flex-shrink-0">
+                    <IoLocationOutline className="w-6 h-6"></IoLocationOutline>
+                  </div>
+                  <div className="flex-grow pl-6">
+                    <h2 className="text-gray-900 text-lg title-font font-medium mb-2">
+                      Your Frequent Destination
+                    </h2>
+                    <p
+                      className={
+                        (errors.addressTo ? "text-red-500" : "text-gray-600") +
+                        "leading-relaxed text-base"
+                      }
+                    >
+                      Select a location you'll be visiting often.
+                    </p>
+                    <div className="mt-3 text-red-500 inline-flex justify-start">
+                      <div className="relative mr-4 lg:w-full w-2/4 md:w-full text-left">
+                        <Autocomplete bounds={bounds}>
+                          <input
+                            type="text"
+                            id="addressTo"
+                            placeholder="Imperial College London, Exhibition Road, London, UK"
+                            className="w-full bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                            {...register("addressTo", {
+                              required: true,
+                            })}
+                          />
+                        </Autocomplete>
+                      </div>
+                      {loading ? (
+                        <button
+                          disabled
+                          key="disabled-button"
+                          className="inline-flex text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg"
+                        >
+                          <HashLoader color={"#ffffff"} loading={loading} />
+                        </button>
+                      ) : (
+                        <button
+                          key="add-button"
+                          className="inline-flex text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg"
+                          type="submit"
+                          value="Add"
+                        >
+                          Select
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 md:w-1/3 flex">
+                  <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500 mb-4 flex-shrink-0">
+                    <IoSettingsOutline className="w-6 h-6"></IoSettingsOutline>
+                  </div>
+                  <div className="flex-grow pl-6">
+                    <h2 className="text-gray-900 text-lg title-font font-medium mb-2">
+                      Your Commute Settings
+                    </h2>
+                    <p className="leading-relaxed text-base">
+                      Choose your mode of transport and travel direction.
+                    </p>
+                    <div className="mt-3 text-red-500 inline-flex items-center align-middle w-full justify-start">
+                      <select
+                        defaultValue="BICYCLING"
+                        className="bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                        {...register("preferredTravelMode", { required: true })}
+                      >
+                        <option value="WALKING">Walk</option>
+                        <option value="BICYCLING">Cycle</option>
+                        <option value="DRIVING">Drive</option>
+                        <option value="TRANSIT">Transit</option>
+                      </select>
+                      {/* <p className="leading-relaxed text-base">
+                        Choose your direction of travel
+                      </p> */}
+                      <select
+                        defaultValue="To"
+                        className="ml-2 bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                        {...register("travelDirection", { required: true })}
+                      >
+                        <option value="To">From Home</option>
+                        <option value="From">To Home</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </section>
+      </MobileView>
+      <section className="text-gray-600 body-font md:relative pt-12 md:p-0">
         <div className="md:absolute flex inset-0 bg-gray-300 w-full h-full">
           <GoogleMap
-            mapContainerStyle={{ width: "100%", height: "100%" }}
-            center={{ lat: center.lat, lng: center.lng + 0.1 }}
-            zoom={12}
+            {...mapProps}
+            // mapContainerStyle={{ width: "100%", height: "100%" }}
+            // center={{ lat: center.lat, lng: center.lng + 0.1 }}
+            // zoom={12}
           >
             {addressFrom && <Marker icon={homeIcon} position={center} />}
 
@@ -412,149 +570,152 @@ const LocationBuddy = () => {
           </div>
         </div>
       </section>
-      <section className="text-gray-600 body-font pt-80 md:pt-0">
-        <form onSubmit={handleSubmit(addAddressTo)}>
-          <div className="container px-5 py-12 mx-auto">
-            <div className="flex flex-wrap sm:-m-4 -mx-4 -mb-10 -mt-4 md:space-y-0 space-y-6">
-              <div className="p-4 md:w-1/3 flex">
-                <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500 mb-4 flex-shrink-0">
-                  <IoHomeOutline className="w-6 h-6"></IoHomeOutline>
-                </div>
-                <div className="flex-grow pl-6">
-                  <h2 className="text-gray-900 text-lg title-font font-medium mb-2">
-                    Your Potential Home
-                  </h2>
-                  <p
-                    className={
-                      (errors.addressFrom ? "text-red-500" : "text-gray-600") +
-                      "leading-relaxed text-base"
-                    }
-                  >
-                    Select the address you're interested in.
-                  </p>
-                  <div className="mt-3 text-red-500 inline-flex items-center justify-start">
-                    <div className="relative mr-4 lg:w-full w-2/4 md:w-full text-left">
-                      <Autocomplete bounds={bounds}>
-                        <input
-                          type="text"
-                          id="addressFrom"
-                          placeholder="Buckingham Palace, London, UK"
-                          className="w-full bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                          {...register("addressFrom", { required: true })}
-                        />
-                      </Autocomplete>
-                    </div>
-                    <button
-                      className="inline-flex text-center text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg"
-                      type="button"
-                      value="Select"
-                      onClick={async () => {
-                        await trigger("addressFrom").then((data) => {
-                          if (data) {
-                            const addressFrom = getValues("addressFrom");
-                            setAddressFrom(addressFrom);
-                          }
-                        });
-                      }}
-                    >
-                      Select
-                    </button>
+      <BrowserView>
+        <section className="text-gray-600 body-font pt-80 md:pt-0">
+          <form onSubmit={handleSubmit(addAddressTo)}>
+            <div className="container px-5 py-12 mx-auto">
+              <div className="flex flex-wrap sm:-m-4 -mx-4 -mb-10 -mt-4 md:space-y-0 space-y-6">
+                <div className="p-4 md:w-1/3 flex">
+                  <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500 mb-4 flex-shrink-0">
+                    <IoHomeOutline className="w-6 h-6"></IoHomeOutline>
                   </div>
-                </div>
-              </div>
-              <div className="p-4 md:w-1/3 flex">
-                <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500 mb-4 flex-shrink-0">
-                  <IoLocationOutline className="w-6 h-6"></IoLocationOutline>
-                </div>
-                <div className="flex-grow pl-6">
-                  <h2 className="text-gray-900 text-lg title-font font-medium mb-2">
-                    Your Frequent Destination
-                  </h2>
-                  <p
-                    className={
-                      (errors.addressTo ? "text-red-500" : "text-gray-600") +
-                      "leading-relaxed text-base"
-                    }
-                  >
-                    Select a location you'll be visiting often.
-                  </p>
-                  <div className="mt-3 text-red-500 inline-flex justify-start">
-                    <div className="relative mr-4 lg:w-full w-2/4 md:w-full text-left">
-                      <Autocomplete bounds={bounds}>
-                        <input
-                          type="text"
-                          id="addressTo"
-                          placeholder="Imperial College London, Exhibition Road, London, UK"
-                          className="w-full bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                          {...register("addressTo", {
-                            required: true,
-                          })}
-                        />
-                      </Autocomplete>
-                    </div>
-                    {loading ? (
+                  <div className="flex-grow pl-6">
+                    <h2 className="text-gray-900 text-lg title-font font-medium mb-2">
+                      Your Potential Home
+                    </h2>
+                    <p
+                      className={
+                        (errors.addressFrom
+                          ? "text-red-500"
+                          : "text-gray-600") + "leading-relaxed text-base"
+                      }
+                    >
+                      Select the address you're interested in.
+                    </p>
+                    <div className="mt-3 text-red-500 inline-flex items-center justify-start">
+                      <div className="relative mr-4 lg:w-full w-2/4 md:w-full text-left">
+                        <Autocomplete bounds={bounds}>
+                          <input
+                            type="text"
+                            id="addressFrom"
+                            placeholder="Buckingham Palace, London, UK"
+                            className="w-full bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                            {...register("addressFrom", { required: true })}
+                          />
+                        </Autocomplete>
+                      </div>
                       <button
-                        disabled
-                        key="disabled-button"
-                        className="inline-flex text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg"
-                      >
-                        <HashLoader color={"#ffffff"} loading={loading} />
-                      </button>
-                    ) : (
-                      <button
-                        key="add-button"
-                        className="inline-flex text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg"
-                        type="submit"
-                        value="Add"
+                        className="inline-flex text-center text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg"
+                        type="button"
+                        value="Select"
+                        onClick={async () => {
+                          await trigger("addressFrom").then((data) => {
+                            if (data) {
+                              const addressFrom = getValues("addressFrom");
+                              setAddressFrom(addressFrom);
+                            }
+                          });
+                        }}
                       >
                         Select
                       </button>
-                    )}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="p-4 md:w-1/3 flex">
-                <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500 mb-4 flex-shrink-0">
-                  <IoSettingsOutline className="w-6 h-6"></IoSettingsOutline>
-                </div>
-                <div className="flex-grow pl-6">
-                  <h2 className="text-gray-900 text-lg title-font font-medium mb-2">
-                    Your Commute Settings
-                  </h2>
-                  <p className="leading-relaxed text-base">
-                    Choose your mode of transport and travel direction.
-                  </p>
-                  <div className="mt-3 text-red-500 inline-flex items-center align-middle w-full justify-start">
-                    <select
-                      defaultValue="BICYCLING"
-                      className="bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                      {...register("preferredTravelMode", { required: true })}
+                <div className="p-4 md:w-1/3 flex">
+                  <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500 mb-4 flex-shrink-0">
+                    <IoLocationOutline className="w-6 h-6"></IoLocationOutline>
+                  </div>
+                  <div className="flex-grow pl-6">
+                    <h2 className="text-gray-900 text-lg title-font font-medium mb-2">
+                      Your Frequent Destination
+                    </h2>
+                    <p
+                      className={
+                        (errors.addressTo ? "text-red-500" : "text-gray-600") +
+                        "leading-relaxed text-base"
+                      }
                     >
-                      <option value="WALKING">Walk</option>
-                      <option value="BICYCLING">Cycle</option>
-                      <option value="DRIVING">Drive</option>
-                      <option value="TRANSIT">Transit</option>
-                    </select>
-                    {/* <p className="leading-relaxed text-base">
+                      Select a location you'll be visiting often.
+                    </p>
+                    <div className="mt-3 text-red-500 inline-flex justify-start">
+                      <div className="relative mr-4 lg:w-full w-2/4 md:w-full text-left">
+                        <Autocomplete bounds={bounds}>
+                          <input
+                            type="text"
+                            id="addressTo"
+                            placeholder="Imperial College London, Exhibition Road, London, UK"
+                            className="w-full bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                            {...register("addressTo", {
+                              required: true,
+                            })}
+                          />
+                        </Autocomplete>
+                      </div>
+                      {loading ? (
+                        <button
+                          disabled
+                          key="disabled-button"
+                          className="inline-flex text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg"
+                        >
+                          <HashLoader color={"#ffffff"} loading={loading} />
+                        </button>
+                      ) : (
+                        <button
+                          key="add-button"
+                          className="inline-flex text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg"
+                          type="submit"
+                          value="Add"
+                        >
+                          Select
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 md:w-1/3 flex">
+                  <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500 mb-4 flex-shrink-0">
+                    <IoSettingsOutline className="w-6 h-6"></IoSettingsOutline>
+                  </div>
+                  <div className="flex-grow pl-6">
+                    <h2 className="text-gray-900 text-lg title-font font-medium mb-2">
+                      Your Commute Settings
+                    </h2>
+                    <p className="leading-relaxed text-base">
+                      Choose your mode of transport and travel direction.
+                    </p>
+                    <div className="mt-3 text-red-500 inline-flex items-center align-middle w-full justify-start">
+                      <select
+                        defaultValue="BICYCLING"
+                        className="bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                        {...register("preferredTravelMode", { required: true })}
+                      >
+                        <option value="WALKING">Walk</option>
+                        <option value="BICYCLING">Cycle</option>
+                        <option value="DRIVING">Drive</option>
+                        <option value="TRANSIT">Transit</option>
+                      </select>
+                      {/* <p className="leading-relaxed text-base">
                         Choose your direction of travel
                       </p> */}
-                    <select
-                      defaultValue="To"
-                      className="ml-2 bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                      {...register("travelDirection", { required: true })}
-                    >
-                      <option value="To">From Home</option>
-                      <option value="From">To Home</option>
-                    </select>
+                      <select
+                        defaultValue="To"
+                        className="ml-2 bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                        {...register("travelDirection", { required: true })}
+                      >
+                        <option value="To">From Home</option>
+                        <option value="From">To Home</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </form>
-      </section>
-      <footer className="text-gray-600 body-font">
-        <div className="container px-5 py-12 md:py-6 mx-auto flex items-center sm:flex-row flex-col">
+          </form>
+        </section>
+      </BrowserView>
+      <footer className="text-gray-600 body-font md:pt-0 pt-96">
+        <div className="container px-5 py-6 mx-auto flex items-center sm:flex-row flex-col">
           <a className="flex title-font font-medium items-center md:justify-start justify-center text-gray-900">
             <img src={smileIcon} className="h-10 w-10"></img>
             <span className="ml-3 text-xl font-fredokaOne">LocationBuddy</span>
