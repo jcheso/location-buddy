@@ -184,6 +184,8 @@ const LocationBuddy = () => {
     reset({
       addressFrom: addressFrom,
       addressTo: "",
+      travelDirection: formData.travelDirection,
+      preferredTravelMode: formData.preferredTravelMode,
     });
     try {
       if (
@@ -354,7 +356,7 @@ const LocationBuddy = () => {
                     </p>
                     <div className="mt-3 text-red-500 inline-flex items-center align-middle w-full justify-start">
                       <select
-                        defaultValue="BICYCLING"
+                        defaultValue="DRIVING"
                         className="bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
                         {...register("preferredTravelMode", { required: true })}
                       >
@@ -638,7 +640,7 @@ const LocationBuddy = () => {
                     </p>
                     <div className="mt-3 text-red-500 inline-flex items-center align-middle w-full justify-start">
                       <select
-                        defaultValue="BICYCLING"
+                        defaultValue="DRIVING"
                         className="w-full bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
                         {...register("preferredTravelMode", { required: true })}
                       >
