@@ -4,10 +4,10 @@ module.exports = {
   siteMetadata: {
     siteUrl: "https://www.locationbuddy.tech",
     title: "",
-    description: "Here to find you the perfectly placed home.",
+    description: "Here to find you the perfectly located home.",
     author: "Jarryd Cheso",
     keywords:
-      "real estate, home, location, google maps, directions, renting, house, buying, flatshare",
+      "real estate, home, location, google maps, directions, renting, house, buying, flatshare, places, commuting,",
     image: "src/assets/images/smile-icon-2.png",
   },
   plugins: [
