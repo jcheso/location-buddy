@@ -4,10 +4,10 @@ module.exports = {
   siteMetadata: {
     siteUrl: "https://www.locationbuddy.tech",
     title: "",
-    description: "Here to find you the perfectly placed home.",
+    description: "Here to find you the perfectly located home.",
     author: "Jarryd Cheso",
     keywords:
-      "real estate, home, location, google maps, directions, renting, house, buying, flatshare",
+      "real estate, home, location, google maps, directions, renting, house, buying, flatshare, places, commuting,",
     image: "src/assets/images/smile-icon-2.png",
   },
   plugins: [
@@ -35,11 +35,12 @@ module.exports = {
 
         gtagConfig: {
           optimize_id: "OPT_CONTAINER_ID",
-          anonymize_ip: true,
+          anonymize_ip: false,
           cookie_expires: 0,
         },
         pluginConfig: {
           head: true,
+          respectDNT: false,
         },
       },
     },
@@ -57,6 +58,7 @@ module.exports = {
         icon: "src/assets/images/smile-icon-2.png", // This path is relative to the root of the site.
       },
     },
+    "gatsby-plugin-offline",
     "gatsby-plugin-sharp",
     "gatsby-transformer-sharp",
     {
