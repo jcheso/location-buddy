@@ -13,6 +13,14 @@ module.exports = {
   plugins: [
     "gatsby-plugin-image",
     {
+      resolve: "gatsby-plugin-robots-txt",
+      options: {
+        host: "https://www.locationbuddy.tech/",
+        sitemap: "https://www.locationbuddy.tech/sitemap/sitemap-index.xml",
+        policy: [{ userAgent: "*", allow: "/" }],
+      },
+    },
+    {
       resolve: `gatsby-plugin-google-adsense`,
       options: {
         publisherId: `ca-pub-4440017294340120`,

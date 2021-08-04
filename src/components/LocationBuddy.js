@@ -28,17 +28,11 @@ import {
 import { OutboundLink } from "gatsby-plugin-google-analytics";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import {
-  BrowserView,
-  MobileView,
-  isBrowser,
-  isMobile,
-} from "react-device-detect";
+import { BrowserView, MobileView, isMobile } from "react-device-detect";
 import HashLoader from "react-spinners/ClipLoader";
 import homeIcon from "../assets/images/baseline_home_black_36dp.png";
 import locationIcon from "../assets/images/baseline_place_black_36dp.png";
-import smileIcon from "../assets/images/smile-icon-2.png";
-
+import { StaticImage } from "gatsby-plugin-image";
 /*global google*/
 
 const schema = yup.object().shape({
@@ -276,12 +270,17 @@ const LocationBuddy = () => {
       {/* Header */}
       <header className="text-gray-600 body-font">
         <div className="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
-          <a className="flex title-font font-medium items-center text-gray-900 mb-4 md:mb-0">
-            <img src={smileIcon} className="h-10 w-10"></img>
+          <div className="flex title-font font-medium items-center text-gray-900 mb-4 md:mb-0">
+            <StaticImage
+              src="../assets/images/smile-icon-2.png"
+              alt="LocationBuddy Icon"
+              loading="eager"
+              className="h-10 w-10"
+            ></StaticImage>
             <span className="ml-3 text-xl font-fredokaOne">LocationBuddy</span>
-          </a>
+          </div>
           <nav className="md:mr-auto md:ml-4 md:py-1 md:pl-4 md:border-l md:border-gray-400	flex flex-wrap items-center text-base justify-center text-center">
-            Here to find you the perfectly placed home
+            Here to find you the perfectly located home
           </nav>
         </div>
       </header>
@@ -302,7 +301,7 @@ const LocationBuddy = () => {
                       className={
                         (errors.addressFrom
                           ? "text-red-500"
-                          : "text-gray-600") + "leading-relaxed text-base"
+                          : "text-gray-600") + " leading-relaxed text-base"
                       }
                     >
                       Select the address you're interested in.
@@ -348,7 +347,7 @@ const LocationBuddy = () => {
                     <p
                       className={
                         (errors.addressTo ? "text-red-500" : "text-gray-600") +
-                        "leading-relaxed text-base"
+                        " leading-relaxed text-base"
                       }
                     >
                       Select a location you'll be visiting often.
@@ -431,12 +430,7 @@ const LocationBuddy = () => {
       </MobileView>
       <section className="text-gray-600 body-font md:relative pt-12 md:p-0">
         <div className="md:absolute flex inset-0 bg-gray-300 w-full h-full">
-          <GoogleMap
-            {...mapProps}
-            // mapContainerStyle={{ width: "100%", height: "100%" }}
-            // center={{ lat: center.lat, lng: center.lng + 0.1 }}
-            // zoom={12}
-          >
+          <GoogleMap {...mapProps}>
             {addressFrom && <Marker icon={homeIcon} position={center} />}
 
             {tableData.map((data, index) => (
@@ -587,7 +581,7 @@ const LocationBuddy = () => {
                       className={
                         (errors.addressFrom
                           ? "text-red-500"
-                          : "text-gray-600") + "leading-relaxed text-base"
+                          : "text-gray-600") + " leading-relaxed text-base"
                       }
                     >
                       Select the address you're interested in.
@@ -633,7 +627,7 @@ const LocationBuddy = () => {
                     <p
                       className={
                         (errors.addressTo ? "text-red-500" : "text-gray-600") +
-                        "leading-relaxed text-base"
+                        " leading-relaxed text-base"
                       }
                     >
                       Select a location you'll be visiting often.
@@ -716,11 +710,19 @@ const LocationBuddy = () => {
       </BrowserView>
       <footer className="text-gray-600 body-font md:pt-0 pt-96">
         <div className="container px-5 py-6 mx-auto flex items-center sm:flex-row flex-col">
-          <a className="flex title-font font-medium items-center md:justify-start justify-center text-gray-900">
-            <img src={smileIcon} className="h-10 w-10"></img>
+          <div className="flex title-font font-medium items-center md:justify-start justify-center text-gray-900">
+            <StaticImage
+              src="../assets/images/smile-icon-2.png"
+              alt="LocationBuddy Icon"
+              loading="lazy"
+              className="h-10 w-10"
+            ></StaticImage>
             <span className="ml-3 text-xl font-fredokaOne">LocationBuddy</span>
-          </a>
-          <OutboundLink href="https://www.jarrydcheso.me/">
+          </div>
+          <OutboundLink
+            aria-label="My Website"
+            href="https://www.jarrydcheso.me/"
+          >
             <p className="text-sm text-gray-500 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-200 sm:py-2 sm:mt-0 mt-4">
               © 2021 Jarryd Cheso
             </p>
@@ -728,24 +730,28 @@ const LocationBuddy = () => {
 
           <span className="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
             <OutboundLink
+              aria-label="My Facebook"
               href="https://www.facebook.com/jarryd.cheso"
               className="text-gray-500"
             >
               <FaFacebookF className="w-5 h-5"></FaFacebookF>
             </OutboundLink>
             <OutboundLink
+              aria-label="My Instagram"
               href="https://www.instagram.com/jarryd711/"
               className="ml-3 text-gray-500"
             >
               <FaInstagram className="w-5 h-5"></FaInstagram>
             </OutboundLink>
             <OutboundLink
+              aria-label="My GitHub"
               href="https://github.com/jcheso"
               className="ml-3 text-gray-500"
             >
               <FaGithub className="w-5 h-5"></FaGithub>
             </OutboundLink>
             <OutboundLink
+              aria-label="My LinkedIn"
               href="https://www.linkedin.com/in/jcheso/"
               className="ml-3 text-gray-500"
             >
