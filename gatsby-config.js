@@ -35,11 +35,12 @@ module.exports = {
 
         gtagConfig: {
           optimize_id: "OPT_CONTAINER_ID",
-          anonymize_ip: true,
+          anonymize_ip: false,
           cookie_expires: 0,
         },
         pluginConfig: {
           head: true,
+          respectDNT: false,
         },
       },
     },
@@ -57,6 +58,7 @@ module.exports = {
         icon: "src/assets/images/smile-icon-2.png", // This path is relative to the root of the site.
       },
     },
+    "gatsby-plugin-offline",
     "gatsby-plugin-sharp",
     "gatsby-transformer-sharp",
     {

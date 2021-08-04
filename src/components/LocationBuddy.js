@@ -29,7 +29,7 @@ import { OutboundLink } from "gatsby-plugin-google-analytics";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { BrowserView, MobileView, isMobile } from "react-device-detect";
-import HashLoader from "react-spinners/ClipLoader";
+import Loader from "react-spinners/BeatLoader";
 import homeIcon from "../assets/images/baseline_home_black_36dp.png";
 import locationIcon from "../assets/images/baseline_place_black_36dp.png";
 import { StaticImage } from "gatsby-plugin-image";
@@ -50,6 +50,7 @@ const LocationBuddy = () => {
     handleSubmit,
     trigger,
     getValues,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
@@ -180,6 +181,10 @@ const LocationBuddy = () => {
 
   //Get directions for the address to
   const addAddressTo = async (formData) => {
+    reset({
+      addressFrom: addressFrom,
+      addressTo: "",
+    });
     try {
       if (
         tableData.length < 6 &&
@@ -338,6 +343,42 @@ const LocationBuddy = () => {
                 </div>
                 <div className="p-4 md:w-1/3 flex">
                   <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500 mb-4 flex-shrink-0">
+                    <IoSettingsOutline className="w-6 h-6"></IoSettingsOutline>
+                  </div>
+                  <div className="flex-grow pl-6">
+                    <h2 className="text-gray-900 text-lg title-font font-medium mb-2">
+                      Your Commute Settings
+                    </h2>
+                    <p className="leading-relaxed text-base text-gray-600">
+                      Choose your mode of transport and travel direction.
+                    </p>
+                    <div className="mt-3 text-red-500 inline-flex items-center align-middle w-full justify-start">
+                      <select
+                        defaultValue="BICYCLING"
+                        className="bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                        {...register("preferredTravelMode", { required: true })}
+                      >
+                        <option value="WALKING">Walk</option>
+                        <option value="BICYCLING">Cycle</option>
+                        <option value="DRIVING">Drive</option>
+                        <option value="TRANSIT">Transit</option>
+                      </select>
+                      {/* <p className="leading-relaxed text-base">
+                        Choose your direction of travel
+                      </p> */}
+                      <select
+                        defaultValue="To"
+                        className="ml-4 bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                        {...register("travelDirection", { required: true })}
+                      >
+                        <option value="To">From Home</option>
+                        <option value="From">To Home</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 md:w-1/3 flex">
+                  <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500 mb-4 flex-shrink-0">
                     <IoLocationOutline className="w-6 h-6"></IoLocationOutline>
                   </div>
                   <div className="flex-grow pl-6">
@@ -372,7 +413,11 @@ const LocationBuddy = () => {
                           key="disabled-button"
                           className="inline-flex text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg"
                         >
-                          <HashLoader color={"#ffffff"} loading={loading} />
+                          <Loader
+                            color={"#ffffff"}
+                            loading={loading}
+                            size={12.5}
+                          />
                         </button>
                       ) : (
                         <button
@@ -384,42 +429,6 @@ const LocationBuddy = () => {
                           Select
                         </button>
                       )}
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4 md:w-1/3 flex">
-                  <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500 mb-4 flex-shrink-0">
-                    <IoSettingsOutline className="w-6 h-6"></IoSettingsOutline>
-                  </div>
-                  <div className="flex-grow pl-6">
-                    <h2 className="text-gray-900 text-lg title-font font-medium mb-2">
-                      Your Commute Settings
-                    </h2>
-                    <p className="leading-relaxed text-base">
-                      Choose your mode of transport and travel direction.
-                    </p>
-                    <div className="mt-3 text-red-500 inline-flex items-center align-middle w-full justify-start">
-                      <select
-                        defaultValue="BICYCLING"
-                        className="bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                        {...register("preferredTravelMode", { required: true })}
-                      >
-                        <option value="WALKING">Walk</option>
-                        <option value="BICYCLING">Cycle</option>
-                        <option value="DRIVING">Drive</option>
-                        <option value="TRANSIT">Transit</option>
-                      </select>
-                      {/* <p className="leading-relaxed text-base">
-                        Choose your direction of travel
-                      </p> */}
-                      <select
-                        defaultValue="To"
-                        className="ml-2 bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                        {...register("travelDirection", { required: true })}
-                      >
-                        <option value="To">From Home</option>
-                        <option value="From">To Home</option>
-                      </select>
                     </div>
                   </div>
                 </div>
@@ -458,7 +467,7 @@ const LocationBuddy = () => {
             </h2>
             <div className="w-full md:h-96 h-64 mx-auto overflow-auto ">
               <table
-                className="table-auto w-full text-left whitespace-no-wrap 	"
+                className="table-auto w-full md:h-auto h-full text-left whitespace-no-wrap"
                 {...getTableProps()}
               >
                 <thead>
@@ -512,7 +521,7 @@ const LocationBuddy = () => {
                   }
                 </thead>
                 {/* Apply the table body props */}
-                <tbody className="overflow-y-scroll" {...getTableBodyProps()}>
+                <tbody {...getTableBodyProps()}>
                   {
                     // Loop over the table rows
                     rows.map((row, index) => {
@@ -599,7 +608,7 @@ const LocationBuddy = () => {
                         </Autocomplete>
                       </div>
                       <button
-                        className="inline-flex text-center text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg"
+                        className="inline-flex w-32 text-center text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg"
                         type="button"
                         value="Select"
                         onClick={async () => {
@@ -613,6 +622,39 @@ const LocationBuddy = () => {
                       >
                         Select
                       </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 md:w-1/3 flex">
+                  <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500 mb-4 flex-shrink-0">
+                    <IoSettingsOutline className="w-6 h-6"></IoSettingsOutline>
+                  </div>
+                  <div className="flex-grow pl-6">
+                    <h2 className="text-gray-900 text-lg title-font font-medium mb-2">
+                      Your Commute Settings
+                    </h2>
+                    <p className="leading-relaxed text-base text-gray-600">
+                      Choose your mode of transport and travel direction.
+                    </p>
+                    <div className="mt-3 text-red-500 inline-flex items-center align-middle w-full justify-start">
+                      <select
+                        defaultValue="BICYCLING"
+                        className="w-full bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                        {...register("preferredTravelMode", { required: true })}
+                      >
+                        <option value="WALKING">Walk</option>
+                        <option value="BICYCLING">Cycle</option>
+                        <option value="DRIVING">Drive</option>
+                        <option value="TRANSIT">Transit</option>
+                      </select>
+                      <select
+                        defaultValue="To"
+                        className="ml-4 w-full bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                        {...register("travelDirection", { required: true })}
+                      >
+                        <option value="To">From Home</option>
+                        <option value="From">To Home</option>
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -650,56 +692,25 @@ const LocationBuddy = () => {
                         <button
                           disabled
                           key="disabled-button"
-                          className="inline-flex text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg"
+                          className="inline-flex w-32 text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg items-center"
                         >
-                          <HashLoader color={"#ffffff"} loading={loading} />
+                          <Loader
+                            margin={2}
+                            color={"#ffffff"}
+                            loading={loading}
+                            size={12.5}
+                          />
                         </button>
                       ) : (
                         <button
                           key="add-button"
-                          className="inline-flex text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg"
+                          className="inline-flex w-32 text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg"
                           type="submit"
                           value="Add"
                         >
                           Select
                         </button>
                       )}
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4 md:w-1/3 flex">
-                  <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500 mb-4 flex-shrink-0">
-                    <IoSettingsOutline className="w-6 h-6"></IoSettingsOutline>
-                  </div>
-                  <div className="flex-grow pl-6">
-                    <h2 className="text-gray-900 text-lg title-font font-medium mb-2">
-                      Your Commute Settings
-                    </h2>
-                    <p className="leading-relaxed text-base">
-                      Choose your mode of transport and travel direction.
-                    </p>
-                    <div className="mt-3 text-red-500 inline-flex items-center align-middle w-full justify-start">
-                      <select
-                        defaultValue="BICYCLING"
-                        className="bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                        {...register("preferredTravelMode", { required: true })}
-                      >
-                        <option value="WALKING">Walk</option>
-                        <option value="BICYCLING">Cycle</option>
-                        <option value="DRIVING">Drive</option>
-                        <option value="TRANSIT">Transit</option>
-                      </select>
-                      {/* <p className="leading-relaxed text-base">
-                        Choose your direction of travel
-                      </p> */}
-                      <select
-                        defaultValue="To"
-                        className="ml-2 bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-red-200 focus:bg-transparent border border-gray-300 focus:border-red-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                        {...register("travelDirection", { required: true })}
-                      >
-                        <option value="To">From Home</option>
-                        <option value="From">To Home</option>
-                      </select>
                     </div>
                   </div>
                 </div>
