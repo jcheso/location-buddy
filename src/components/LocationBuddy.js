@@ -161,6 +161,7 @@ const LocationBuddy = () => {
       });
       //Set new addressFrom state
       setAddressFromState(newAddressFrom);
+      setZoom(12);
     } else {
       alert("You've already selected this address");
     }
@@ -264,12 +265,14 @@ const LocationBuddy = () => {
     });
   };
 
+  const [zoom, setZoom] = useState(12);
+
   const mapProps = {
     mapContainerStyle: { width: "100%", height: "100%" },
     center: isMobile
       ? { lat: center.lat, lng: center.lng }
       : { lat: center.lat, lng: center.lng + 0.1 },
-    zoom: 12,
+    zoom: zoom,
   };
 
   return (
