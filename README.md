@@ -8,3 +8,4 @@ Frontend and CMS Hosted by Netlify.
 - Gatsby.js
 - GraphQL
 - Sanity.io Content Management System
+- Styled with Tailwind CSS
